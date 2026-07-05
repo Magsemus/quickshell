@@ -6,7 +6,13 @@ import QtQuick // for Text
 import QtQuick.Layouts
 import "../ColorSchemes"
 
-Scope {
+Text {
+    text: "CPU: " + cpuUsage + "%"
+    color: theme.colYellow
+    font { family: theme.fontFamily; pixelSize: theme.fontSize; bold: true }
+
+    Colorscheme { id: theme}
+
     property var lastCpuTotal
     property var lastCpuIdle
     property var cpuUsage: 0
@@ -33,5 +39,9 @@ Scope {
             }
         }
         Component.onCompleted: running = true
+    }
+
+    Text {
+
     }
 }
