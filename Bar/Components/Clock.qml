@@ -10,6 +10,6 @@ Text {
     id: clock
     text: Qt.formatDateTime(new Date(), "HH:mm")
     color: theme.colBlue
-    font { family: theme.fontFamily; pixelSize: 8; bold: true }
+    font { family: theme.fontFamily; pixelSize: 9; bold: true }
     renderType: Text.NativeRendering
 }
