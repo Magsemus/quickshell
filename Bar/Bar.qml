@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import QtQuick // for Text
 import QtQuick.Layouts
 import "../ColorSchemes"
+import "./Components"
 
 Scope {
 
@@ -59,9 +60,46 @@ Scope {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.rightMargin: 12
-                spacing: 16
+                spacing: 0
                 // Add your right-side elements here later (Clock, Battery, Volume, etc.)
-                Clock { id: clock }
+
+                Rectangle {
+                    Layout.rightMargin: 12
+                    radius: 12
+                    
+                    width: clockRow.width + 20
+                    height: clockRow.height
+                    color: theme.colMuted
+
+                    Row {
+                        id: clockRow
+                        anchors.centerIn: parent
+                        spacing: 4
+                        Text
+                        {
+                            text: "󰸘"
+                            color: theme.colBlue
+                            font { family: theme.fontFamily; pixelSize: 18; bold: true }
+                            renderType: Text.NativeRendering
+                        }
+
+                        Column {
+                            id: clockLayout
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: -1
+
+                            Clock { 
+                                id: clock 
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+
+                            DateTime { 
+                                id: dateTime
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+                    }
+                }
 
                 Rectangle
                 {
@@ -70,8 +108,6 @@ Scope {
 
                     width: layoutRow.width + 20
                     height: layoutRow.height + 5
-                    
-                    
                     color: theme.colMuted
 
                     Row {
@@ -93,6 +129,10 @@ Scope {
                         cpu.updateCpu()
                         mem.updateMem()
                         gpu.updateGpu()
+
+                        var now = new Date()
+                        clock.text = Qt.formatDateTime(now, "HH:mm")
+                        dateTime.text = Qt.formatDateTime(now, "MMM dd")
                     }
                 }
             }

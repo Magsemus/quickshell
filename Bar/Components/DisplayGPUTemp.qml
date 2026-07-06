@@ -4,7 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick // for Text
 import QtQuick.Layouts
-import "../ColorSchemes"
+import "../../ColorSchemes"
 
 Text {
     text: " " + gpuTemp + "°C"

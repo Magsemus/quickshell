@@ -3,7 +3,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick // for Text
 import QtQuick.Layouts
-import "../ColorSchemes"
+import "../../ColorSchemes"
 
 Repeater {
     Colorscheme { id: theme }
