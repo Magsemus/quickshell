@@ -7,28 +7,25 @@ import QtQuick.Layouts
 import "../ColorSchemes"
 
 Text {
-    text: "󰍛 " + mem.memUsage + "%"
+    text: " " + gpuTemp + "°C"
     color: theme.colCyan
     font { family: theme.fontFamily; pixelSize: theme.fontSize; bold: true }
     renderType: Text.NativeRendering
 
-    property int memUsage: 0
+    property int gpuTemp: 0
 
-    function updateMem()
+    function updateGpu()
     {
-        memProc.running = true
+        gpuProc.running = true
     }
 
     Process {
-        id: memProc
-        command: ["sh", "-c", "free | grep Mem"]
+        id: gpuProc
+        command: ["sh", "-c", "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits"]
         stdout: SplitParser {
             onRead: data => {
                 if (!data) return
-                var parts = data.trim().split(/\s+/)
-                var total = parseInt(parts[1]) || 1
-                var used = parseInt(parts[2]) || 0
-                memUsage = Math.round(100 * used / total)
+                gpuTemp = data
             }
         }
         Component.onCompleted: running = true

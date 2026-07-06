@@ -46,7 +46,8 @@ Scope {
                 text: Hyprland.activeToplevel ? (Hyprland.activeToplevel.title || "Window") : ""
 
                 color: theme.colFg
-                font { family: theme.fontFamily; pixelSize: theme.fontSize; bold: true }
+                font { family: theme.fontFamily; pixelSize: 14; bold: true }
+                renderType: Text.NativeRendering
                 
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
@@ -61,8 +62,28 @@ Scope {
                 spacing: 16
                 // Add your right-side elements here later (Clock, Battery, Volume, etc.)
                 Clock { id: clock }
-                DisplayCPU { id: cpu }
-                DisplayMemory { id: mem }
+
+                Rectangle
+                {
+                    Layout.rightMargin: 12
+                    radius: 12
+
+                    width: layoutRow.width + 20
+                    height: layoutRow.height + 5
+                    
+                    
+                    color: theme.colMuted
+
+                    Row {
+                        id: layoutRow
+                        anchors.centerIn: parent
+                        spacing: 10
+
+                        DisplayCPU { id: cpu }
+                        DisplayMemory { id: mem }
+                        DisplayGPUTemp { id: gpu }
+                    }
+                }
 
                 Timer {
                     interval: 2000
@@ -71,7 +92,7 @@ Scope {
                     onTriggered: {
                         cpu.updateCpu()
                         mem.updateMem()
-                        clock.text = Qt.formatDateTime(new Date(), "ddd, MMM dd - HH:mm")
+                        gpu.updateGpu()
                     }
                 }
             }

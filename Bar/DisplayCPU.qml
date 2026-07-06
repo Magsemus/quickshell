@@ -7,9 +7,10 @@ import QtQuick.Layouts
 import "../ColorSchemes"
 
 Text {
-    text: "CPU: " + cpuUsage + "%"
-    color: theme.colYellow
+    text: "󰓅 " + cpuUsage + "%"
+    color: theme.colCyan
     font { family: theme.fontFamily; pixelSize: theme.fontSize; bold: true }
+    renderType: Text.NativeRendering
 
     Colorscheme { id: theme}
 

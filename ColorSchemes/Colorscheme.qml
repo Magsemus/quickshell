@@ -9,6 +9,6 @@ QtObject {
     property color colBlue: "#7aa2f7"
     property color colYellow: "#e0af68"
     property string fontFamily: "JetBrainsMono Nerd Font"
-    property int fontSize: 14
+    property int fontSize: 11
 }
 
