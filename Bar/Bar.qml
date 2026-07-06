@@ -28,7 +28,7 @@ Scope {
 
             radius: 12
 
-            color: theme.colBg
+            color: theme.colDarkBlue
             
             RowLayout {
                 id: leftSection
@@ -69,7 +69,7 @@ Scope {
                     
                     width: clockRow.width + 20
                     height: clockRow.height
-                    color: theme.colMuted
+                    color: theme.colLightBlue
 
                     Row {
                         id: clockRow
@@ -108,7 +108,7 @@ Scope {
 
                     width: layoutRow.width + 20
                     height: layoutRow.height + 5
-                    color: theme.colMuted
+                    color: theme.colLightBlue
 
                     Row {
                         id: layoutRow

@@ -8,6 +8,8 @@ QtObject {
     property color colCyan: "#0db9d7"
     property color colBlue: "#7aa2f7"
     property color colYellow: "#e0af68"
+    property color colDarkBlue: Qt.rgba(0.039, 0.039, 0.204, 0.75)
+    property color colLightBlue: Qt.rgba(0.157, 0.157, 0.816, 0.2)
     property string fontFamily: "JetBrainsMono Nerd Font"
     property int fontSize: 11
 }

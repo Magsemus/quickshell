@@ -17,6 +17,7 @@ Repeater {
         text: ws.id
         color: isActive ? theme.colCyan : theme.colBlue
         font { pixelSize: 14; bold: true }
+        renderType: Text.NativeRendering
 
         MouseArea {
             anchors.fill: parent
