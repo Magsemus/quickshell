@@ -125,14 +125,8 @@ Scope {
                             }
                             clickAble: false
                         }
-                        ServiceButton { 
-                            id: performance 
-                            activeIcon: ""
-                            onClickedAction: function () {
-                                console.log("GIGGITY PERFORMANCE!")
-                            }
-                            clickAble: false
-                        }
+
+                        Power { id: performance }
                     }
                 }
 
