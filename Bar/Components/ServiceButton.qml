@@ -12,6 +12,7 @@ Rectangle
 
     property string labelText: ""
     property var onClickedAction: function () { console.log("No action defined") }
+    property bool clickAble: true
 
     width: 28
     height: 20
@@ -19,7 +20,7 @@ Rectangle
 
     Colorscheme { id: theme } 
 
-    color: mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")
+    color: clickAble ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: 150 }
@@ -38,9 +39,19 @@ Rectangle
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        
+        onEntered: {
+            if (!root.clickAble)
+            {
+                root.onClickedAction()
+            }
+        }
 
         onClicked: {
-            root.onClickedAction()
+            if (root.clickAble)
+            {
+                root.onClickedAction()
+            }
         }
     }
 }

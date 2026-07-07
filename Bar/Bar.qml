@@ -64,12 +64,12 @@ Scope {
                 // Add your right-side elements here later (Clock, Battery, Volume, etc.)
 
                 Rectangle {
-                    Layout.rightMargin: 12
+                    Layout.rightMargin: 3
                     radius: 12
                     
                     width: clockRow.width + 20
                     height: clockRow.height
-                    color: theme.colLightBlue
+                    color: "transparent"
 
                     Row {
                         id: clockRow
@@ -100,10 +100,45 @@ Scope {
                         }
                     }
                 }
+                
+                Rectangle
+                {
+                    Layout.rightMargin: 6
+                    radius: 12
+
+                    width: servicesLayoutRow.width + 10
+                    height: servicesLayoutRow.height + 0
+                    color: theme.colLightBlue
+
+                    Row
+                    {
+                        id: servicesLayoutRow
+                        anchors.centerIn: parent
+
+                        Wifi { id: wifi }
+
+                        ServiceButton { 
+                            id: bluetooth
+                            labelText: "󰂯"
+                            onClickedAction: function () {
+                                console.log("GIGGITY BLUETOOTH!")
+                            }
+                            clickAble: false
+                        }
+                        ServiceButton { 
+                            id: performance 
+                            labelText: ""
+                            onClickedAction: function () {
+                                console.log("GIGGITY PERFORMANCE!")
+                            }
+                            clickAble: false
+                        }
+                    }
+                }
 
                 Rectangle
                 {
-                    Layout.rightMargin: 12
+                    Layout.rightMargin: 24
                     radius: 12
 
                     width: layoutRow.width + 20
@@ -118,6 +153,14 @@ Scope {
                         DisplayCPU { id: cpu }
                         DisplayMemory { id: mem }
                         DisplayGPUTemp { id: gpu }
+                    }
+                }
+
+                ServiceButton { 
+                    id: power 
+                    labelText: ""
+                    onClickedAction: function () {
+                        console.log("GIGGITY POWER!")
                     }
                 }
 
