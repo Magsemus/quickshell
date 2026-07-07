@@ -8,14 +8,18 @@ import "../../ColorSchemes"
 
 Rectangle 
 {
-    id: wifiButton
+    id: root
+
+    property string labelText: ""
+    property var onClickedAction: function () { console.log("No action defined") }
+
     width: 28
     height: 20
     radius: 16
 
     Colorscheme { id: theme } 
 
-    color: wifiMouseArea.containsPress ? theme.colClickBlue : (wifiMouseArea.containsMouse ? theme.colHoverBlue : "transparent")
+    color: mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")
 
     Behavior on color {
         ColorAnimation { duration: 150 }
@@ -24,19 +28,19 @@ Rectangle
     Text
     {
         anchors.centerIn: parent
-        text: "󰤢"
+        text: root.labelText
         color: theme.colFg
         font { family: theme.fontFamily; pixelSize: 14; bold: true }
         renderType: Text.NativeRendering
     }
 
     MouseArea {
-        id: wifiMouseArea
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
 
         onClicked: {
-            console.log("GIGGITY WIFI!")
+            root.onClickedAction()
         }
     }
 }
