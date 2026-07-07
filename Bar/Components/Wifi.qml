@@ -9,11 +9,12 @@ Item
 
     ServiceButton { 
         id: wifi 
-        labelText: "󰤯"
+        activeIcon: "󰤯"
         onClickedAction: function () {
             console.log("GIGGITY WIFI!")
         }
         clickAble: false
+        animationType: "fade"
     }
 
     Process
@@ -32,19 +33,17 @@ Item
 
                 let status = parts[0]
                 let strength = parseInt(parts[1])
-
-                if (status == "disconnected") 
+                
+                let targetIcon = "󰤮";
+                if (status != "disconnected") 
                 {
-                    wifi.labelText = "󰤮"
+                    if (strength > 80) targetIcon = "󰤨";      
+                    else if (strength > 60) targetIcon = "󰤥"; 
+                    else if (strength > 40) targetIcon = "󰤢"; 
+                    else if (strength > 20) targetIcon = "󰤟";
+                    else targetIcon = "󰤯"
                 }
-                else
-                {
-                    if (strength > 80) wifi.labelText = "󰤨";      
-                    else if (strength > 60) wifi.labelText = "󰤥"; 
-                    else if (strength > 40) wifi.labelText = "󰤢"; 
-                    else if (strength > 20) wifi.labelText = "󰤟";
-                    else wifi.labelText = "󰤯"
-                }
+                wifi.updateIcon(targetIcon);
             }
         }
     }

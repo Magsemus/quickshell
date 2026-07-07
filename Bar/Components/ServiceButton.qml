@@ -10,9 +10,10 @@ Rectangle
 {
     id: root
 
-    property string labelText: ""
+    property string activeIcon: ""
     property var onClickedAction: function () { console.log("No action defined") }
     property bool clickAble: true
+    property string animationType: "pop"
 
     width: 28
     height: 20
@@ -25,14 +26,98 @@ Rectangle
     Behavior on color {
         ColorAnimation { duration: 150 }
     }
-
-    Text
+    
+    function updateIcon(nextIcon)
     {
-        anchors.centerIn: parent
-        text: root.labelText
-        color: theme.colFg
-        font { family: theme.fontFamily; pixelSize: 14; bold: true }
-        renderType: Text.NativeRendering
+        if (activeIcon == nextIcon) return;
+
+        if (animationType == "pop")
+        {
+            popAnimation.animations[1].value = nextIcon;
+            popAnimation.start();
+        }
+        else if (animationType == "fade") 
+        {
+            incomingText.text = nextIcon;
+            fadeAnimation.start();
+        }
+        else
+        {
+            activeIcon = nextIcon;
+        }
+    }
+    
+    Item {
+        id: iconContainer
+        anchors.fill: parent
+
+        Text
+        {
+            id: iconText
+            anchors.centerIn: parent
+            text: root.activeIcon
+            color: theme.colFg
+            font { family: theme.fontFamily; pixelSize: 14; bold: true }
+            renderType: Text.NativeRendering
+            transformOrigin: Item.Center
+            opacity: 1.0
+        }
+
+        Text
+        {
+            id: incomingText
+            anchors.centerIn: parent
+            text: root.activeIcon
+            color: theme.colFg
+            font { family: theme.fontFamily; pixelSize: 14; bold: true }
+            renderType: Text.NativeRendering
+            transformOrigin: Item.Center
+            opacity: 0.0
+        }
+    }
+    
+    SequentialAnimation {
+        id: popAnimation
+        
+        // Step A: Shrink the old icon down to nothing
+        NumberAnimation { 
+            target: iconText; property: "scale"
+            to: 0; duration: 150; easing.type: Easing.InQuad 
+        }
+        
+        // Step B: Swap the text string instantly while it is invisible
+        PropertyAction { 
+            target: root; property: "activeIcon"
+            // We pass the new icon dynamically when starting the animation
+        }
+        
+        // Step C: Pop it back up to full size with the spring effect
+        NumberAnimation { 
+            target: iconText; property: "scale"
+            to: 1; duration: 200; easing.type: Easing.OutQuad
+            easing.amplitude: 1.6
+        }
+    }
+
+    SequentialAnimation {
+        id: fadeAnimation
+        
+        ParallelAnimation {
+            NumberAnimation { target: iconText; property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutQuad }
+            NumberAnimation { target: incomingText; property: "opacity"; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+        }
+        
+        ScriptAction {
+            script: {
+                // Instantly promote the incoming icon value to the primary activeIcon property
+                root.activeIcon = incomingText.text;
+                
+                // Instantly snap the opacities back to default states behind the scenes
+                iconText.opacity = 1.0;
+                incomingText.opacity = 0.0;
+                incomingText.text = "";
+            }
+        }
     }
 
     MouseArea {

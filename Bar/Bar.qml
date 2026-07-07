@@ -119,7 +119,7 @@ Scope {
 
                         ServiceButton { 
                             id: bluetooth
-                            labelText: "󰂯"
+                            activeIcon: "󰂯"
                             onClickedAction: function () {
                                 console.log("GIGGITY BLUETOOTH!")
                             }
@@ -127,7 +127,7 @@ Scope {
                         }
                         ServiceButton { 
                             id: performance 
-                            labelText: ""
+                            activeIcon: ""
                             onClickedAction: function () {
                                 console.log("GIGGITY PERFORMANCE!")
                             }
@@ -158,7 +158,7 @@ Scope {
 
                 ServiceButton { 
                     id: power 
-                    labelText: ""
+                    activeIcon: ""
                     onClickedAction: function () {
                         console.log("GIGGITY POWER!")
                     }
