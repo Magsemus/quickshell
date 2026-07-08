@@ -62,9 +62,12 @@ Scope {
                 anchors.rightMargin: 12
                 spacing: 0
                 // Add your right-side elements here later (Clock, Battery, Volume, etc.)
+                
+                Tray { id: tray }
 
                 Rectangle {
                     Layout.rightMargin: 3
+                    Layout.leftMargin: 3
                     radius: 12
                     
                     width: clockRow.width + 20

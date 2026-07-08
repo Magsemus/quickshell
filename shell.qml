@@ -1,3 +1,5 @@
+//@ pragma UseQApplication
+//@ pragma IconTheme "Adwaita"
 import Quickshell // for PanelWindow
 import Quickshell.Wayland
 import Quickshell.Hyprland
