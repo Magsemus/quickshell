@@ -7,31 +7,32 @@ import QtQuick.Layouts
 import "../../ColorSchemes"
 
 Text {
-    text: "󰍛 " + mem.memUsage + "%"
+    id: root
+
+    property var parseData: function(data) { return data }
+    property string procCommand: ""
+
+    property int value: 0
+    property int value2: 0
+    property int value3: 0
+        
     color: theme.colCyan
     font { family: theme.fontFamily; pixelSize: theme.fontSize; bold: true }
     renderType: Text.NativeRendering
 
-    property int memUsage: 0
-
-    function updateMem()
+    function update()
     {
-        memProc.running = true
+        diagProc.running = true
     }
 
     Process {
-        id: memProc
-        command: ["sh", "-c", "free | grep Mem"]
+        id: diagProc
+        command: ["sh", "-c", procCommand]
         stdout: SplitParser {
             onRead: data => {
-                if (!data) return
-                var parts = data.trim().split(/\s+/)
-                var total = parseInt(parts[1]) || 1
-                var used = parseInt(parts[2]) || 0
-                memUsage = Math.round(100 * used / total)
+                root.value = root.parseData(data)
             }
         }
         Component.onCompleted: running = true
     }
-
 }
