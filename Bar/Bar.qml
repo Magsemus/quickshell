@@ -146,10 +146,49 @@ Scope {
                         id: layoutRow
                         anchors.centerIn: parent
                         spacing: 10
+                        
 
-                        DisplayCPU { id: cpu }
-                        DisplayMemory { id: mem }
-                        DisplayGPUTemp { id: gpu }
+                        DiagnosticText {
+                            id: cpu
+                            text: "󰓅 " + value + "%"
+                            parseData: function(data) {
+                                if (!data) return
+                                var p = data.trim().split(/\s+/)
+                                var idle = parseInt(p[4]) + parseInt(p[5])
+                                var total = p.slice(1, 8).reduce((a, b) => a + parseInt(b), 0)
+                                
+                                var result = value
+                                if (value2 > 0) {
+                                    result = Math.round(100 * (1 - (idle - value3) / (total - value2)))
+                                }
+
+                                value2 = total
+                                value3 = idle
+                                return result
+                            }
+                            procCommand: "head -1 /proc/stat"
+                        }
+                        DiagnosticText { 
+                            id: mem 
+                            text: "󰍛 " + value + "%"
+                            parseData: function(data) {
+                                if (!data) return
+                                var parts = data.trim().split(/\s+/)
+                                var total = parseInt(parts[1]) || 1
+                                var used = parseInt(parts[2]) || 0
+                                return Math.round(100 * used / total)
+                            }
+                            procCommand: "free | grep Mem"
+                        }
+                        DiagnosticText { 
+                            id: gpu
+                            text: " " + value + "°C"
+                            parseData: function(data) {
+                                if (!data) return
+                                return data
+                            }
+                            procCommand: "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits"
+                        }
                     }
                 }
 
@@ -166,9 +205,9 @@ Scope {
                     running: true
                     repeat: true
                     onTriggered: {
-                        cpu.updateCpu()
-                        mem.updateMem()
-                        gpu.updateGpu()
+                        cpu.update()
+                        mem.update()
+                        gpu.update()
 
                         var now = new Date()
                         clock.text = Qt.formatDateTime(now, "HH:mm")
