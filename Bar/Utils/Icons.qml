@@ -6,7 +6,7 @@ import "Icons.js" as IconData
 
 Singleton 
 {
-    property var iconMap: IconData.dictionary
+    property var iconMap: IconData.icons
 
     function getTrayIcon(id: string, icon: string): string
     {
@@ -33,5 +33,10 @@ Singleton
 
         // 3. Fallback for native/standard apps (like Discord)
         return icon;
+    }
+
+    function getArchIcon() : string
+    {
+        return iconMap["arch"]
     }
 }

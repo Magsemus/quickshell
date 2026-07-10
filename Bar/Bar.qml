@@ -3,8 +3,10 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick // for Text
 import QtQuick.Layouts
+import Quickshell.Widgets
 import "../ColorSchemes"
 import "./Components"
+import "./Utils"
 
 Scope {
 
@@ -35,23 +37,79 @@ Scope {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.leftMargin: 12
+                
+                Image
+                {
+                    Layout.rightMargin: 5
+                    source: Icons.getArchIcon()
+                }
 
                 Workspaces {}
             }
-
-            Text 
+            
+            Rectangle
             {
                 anchors.centerIn: parent
-                width: parent.width * 0.2
-
-                text: Hyprland.activeToplevel ? (Hyprland.activeToplevel.title || "Window") : ""
-
-                color: theme.colFg
-                font { family: theme.fontFamily; pixelSize: 14; bold: true }
-                renderType: Text.NativeRendering
+                width: Math.min(title.implicitWidth + 20, panelBar.width * 0.2 + 20)                
+                height: title.height
+                radius: 12
                 
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
+                Behavior on width {
+                    NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+                }   
+
+                color: theme.colDarkBlue
+
+                Text 
+                {
+                    id: title
+                    anchors.centerIn: parent
+                    width: panelBar.width * 0.2
+
+                    color: theme.colFg
+                    font { family: theme.fontFamily; pixelSize: 14; bold: true }
+                    renderType: Text.NativeRendering
+
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    
+                    readonly property string realTitle: Hyprland.activeToplevel ? (Hyprland.activeToplevel.title || "Window") : ""
+
+                    Component.onCompleted: text = realTitle
+
+                    onRealTitleChanged: deferTimer.restart()
+
+                    Timer {
+                        id: deferTimer
+                        interval: 50 // A tiny 50ms buffer to let Hyprland's IPC catch up
+                        repeat: false
+                        onTriggered: {
+                            if (fadeSequence.running) fadeSequence.stop()
+                            fadeSequence.start()
+                        }
+                    }
+
+                    SequentialAnimation {
+                        id: fadeSequence
+                        
+                        // Step A: Shrink the old icon down to nothing
+                        NumberAnimation { 
+                            target: title; property: "opacity"
+                            to: 0; duration: 200; easing.type: Easing.InQuad 
+                        }
+
+                        PropertyAction { 
+                            target: title
+                            property: "text"
+                            value: title.realTitle 
+                        }
+                        // Step C: Pop it back up to full size with the spring effect
+                        NumberAnimation { 
+                            target: title; property: "opacity"
+                            to: 1; duration: 220; easing.type: Easing.OutQuad
+                        }
+                    }
+                }
             }
 
 
