@@ -103,8 +103,8 @@ Rectangle
         id: fadeAnimation
         
         ParallelAnimation {
-            NumberAnimation { target: iconText; property: "opacity"; to: 0.0; duration: 150; easing.type: Easing.OutQuad }
-            NumberAnimation { target: incomingText; property: "opacity"; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+            NumberAnimation { target: iconText; property: "opacity"; to: 0.0; duration: 200; easing.type: Easing.OutQuad }
+            NumberAnimation { target: incomingText; property: "opacity"; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
         }
         
         ScriptAction {

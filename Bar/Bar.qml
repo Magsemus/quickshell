@@ -19,15 +19,18 @@ Scope {
             left: true
             right: true
         }
-        implicitHeight: 30
+        implicitHeight: 50
         color: "transparent"
 
         Rectangle 
         {
             id: backgroundRect
-            anchors.fill: parent
             anchors.margins: 1
-
+            anchors.topMargin: 20
+            anchors.centerIn: parent
+            
+            width: parent.width - 10
+            height: parent.height - 20
             radius: 12
 
             color: theme.colDarkBlue
@@ -177,7 +180,31 @@ Scope {
                         id: servicesLayoutRow
                         anchors.centerIn: parent
 
-                        Wifi { id: wifi }
+                        ServiceScriptButton {
+                            id: wifi
+                            clickedAction: function() { console.log("GIGGITY WIFI!")}
+                            scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_steam.sh"
+                            procAction: function(line) {
+                                let cleanLine = line.trim();
+                                let parts = cleanLine.split(" ")
+
+                                let status = parts[0]
+                                let strength = parseInt(parts[1])
+
+                                let targetIcon = "󰤮";
+                                if (status != "disconnected") 
+                                {
+                                    if (strength > 80) targetIcon = "󰤨";      
+                                    else if (strength > 60) targetIcon = "󰤥"; 
+                                    else if (strength > 40) targetIcon = "󰤢"; 
+                                    else if (strength > 20) targetIcon = "󰤟";
+                                    else targetIcon = "󰤯"
+                                }
+                                triggerIconUpdate(targetIcon);
+                            }
+                            textIcon: "󰤯"
+                            buttonAnimationType: "fade"
+                        }
 
                         ServiceButton { 
                             id: bluetooth
@@ -188,7 +215,16 @@ Scope {
                             clickAble: false
                         }
 
-                        Power { id: performance }
+                        ServiceScriptButton {
+                            id: powerProfile
+                            clickedAction: function() { console.log("KONO POWA!")}
+                            scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/power_stream.sh"
+                            procAction: function(line) {
+                                let cleanLine = line.trim();
+                                triggerIconUpdate(cleanLine);
+                            }
+                            textIcon: ""
+                        }
                     }
                 }
 

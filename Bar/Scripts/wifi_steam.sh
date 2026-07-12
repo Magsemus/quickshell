@@ -19,4 +19,17 @@ get_wifi_status
 # This blocks efficiently and only triggers a loop iteration on network events
 nmcli monitor | while read -r line; do
     get_wifi_status
+done &
+
+last_strength=""
+
+while true; do
+    current_strength=$(nmcli -f IN-USE,SIGNAL device wifi list | awk '$1=="*"{print $2}')
+    
+    if [ "$current_strength" != "$last_strength" ]; then
+        get_wifi_status
+        last_strength=$current_strength
+    fi
+
+    sleep 5
 done

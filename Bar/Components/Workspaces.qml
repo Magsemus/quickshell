@@ -70,7 +70,7 @@ Item {
             NumberAnimation { duration: 400; easing.type: Easing.OutQuad }
         }
 
-        ListView {
+        AnimatedListView {
             id: workspaceList
                 
             // 3. Point your ListView to the persistent ListModel
@@ -139,7 +139,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    ListView {
+                    AnimatedListView {
                         model: ws.toplevels
                         height: parent.height
                         implicitWidth: contentWidth
@@ -162,47 +162,12 @@ Item {
                                 anchors.horizontalCenter: parent.horizontalCenter
                             }
                         }
-
-                        add: Transition {
-                            NumberAnimation { property: "y"; from: 5; to: 0; duration: 300; easing.type: Easing.OutQuad }
-                            NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 300; easing.type: Easing.OutQuad }
-                            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
-                        }
-
-                        remove: Transition {
-                            ParallelAnimation {
-                                NumberAnimation { property: "width"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
-                                NumberAnimation { property: "opacity"; to: 0.0; duration: 200 }
-                            }
-                        }
                     }
                 }
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = " + (wsId) + " })")
-                }
-            }
-
-            // Transitions will now properly detect item variations:
-            add: Transition {
-                NumberAnimation { property: "y"; from: 5; to: 0; duration: 300; easing.type: Easing.OutQuad }
-                NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 300; easing.type: Easing.OutQuad }
-                NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
-            }
-
-            remove: Transition {
-                ParallelAnimation {
-                    NumberAnimation { property: "width"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
-                    NumberAnimation { property: "opacity"; to: 0.0; duration: 200 }
-                }
-            }
-
-            displaced: Transition {
-                NumberAnimation {
-                    properties: "x,y"
-                    duration: 250
-                    easing.type: Easing.InOutQuad
                 }
             }
         }

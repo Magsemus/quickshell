@@ -4,7 +4,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import "../Utils"
 
-ListView {
+AnimatedListView {
     orientation: ListView.Horizontal
     spacing: 8
     
@@ -47,33 +47,6 @@ ListView {
                 // Opens the application's context menu at the cursor's location
                 modelData.display(mainWindow, mouse.x, mouse.y);
             }
-        }
-    }
-
-    add: Transition {
-        // Start slightly lower (y: 5) and move up to its layout position (y: 0)
-        NumberAnimation { property: "y"; from: 5; to: 0; duration: 300; easing.type: Easing.OutQuad }
-        // Scale up from 70% to 100%
-        NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 300; easing.type: Easing.OutQuad }
-        // Fade in
-        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
-    }
-
-    // When a daemon closes: Pop out shrinking down to 0% size
-    remove: Transition {
-        ParallelAnimation {
-            // Shrink the width to 0 so neighboring icons slide over smoothly
-            NumberAnimation { property: "width"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
-            NumberAnimation { property: "opacity"; to: 0.0; duration: 200 }
-        }
-    }
-
-    // The Magic: Slide the remaining icons smoothly to their new positions
-    displaced: Transition {
-        NumberAnimation {
-            properties: "x,y"
-            duration: 250
-            easing.type: Easing.InOutQuad
         }
     }
 }
