@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import QtQuick // for Text
 import QtQuick.Layouts
 import "../../ColorSchemes"
+import "../Utils"
 
 Item {   
     id: root
@@ -60,8 +61,8 @@ Item {
 
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
-        width: workspaceList.implicitWidth + 30      
-        height: workspaceList.height + 2
+        width: workspaceList.contentWidth + workspaceList.leftMargin + workspaceList.rightMargin      
+        height: workspaceList.implicitHeight + 2
         radius: 12
         color: theme.colLightBlue
 
@@ -76,33 +77,105 @@ Item {
             model: dynamicWorkspaceModel
 
             orientation: ListView.Horizontal
-            spacing: 0 
-            height: 18
+
+            spacing: 5
+            implicitHeight: 18
 
             leftMargin: 15
             rightMargin: 15
             
-            implicitWidth: contentWidth
+            anchors.fill: parent
             anchors.verticalCenter: parent.verticalCenter
             interactive: false 
 
             delegate: Item {
-                id: delegateContainer
-                width: 20  
-                height: 18
+                id: delegateRoot
 
-                // 4. Reference variables via the dynamic list model fields now
+                // 1. Maintain a completely stable, non-collapsing width target boundary 
+                // so icons and text never get squeezed together during transitions
+                implicitWidth: layoutRow.childrenRect.width + 14
+                height: parent.height - 3
+                anchors.verticalCenter: parent.verticalCenter
+
                 property var ws: workspaceObject 
                 property bool isActive: Hyprland.focusedWorkspace?.id === wsId
 
-                Text {
-                    anchors.fill: parent
-                    text: wsId
-                    color: isActive ? theme.colCyan : theme.colBlue
-                    font { pixelSize: 14; bold: true }
-                    renderType: Text.NativeRendering
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                // 2. The Isolated Highlight Layer
+                Rectangle {
+                    id: highlightBackground
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height
+                    radius: 12
+                    color: theme.colClickBlue
+
+                    // Control the fading separately
+                    opacity: delegateRoot.isActive ? 1.0 : 0.0
+                    Behavior on opacity {
+                        NumberAnimation { duration: 150; easing.type: Easing.InOutQuad }
+                    }
+
+                    // Animate the growth right-ward across the static item space safely
+                    width: delegateRoot.isActive ? parent.width : 0
+
+                    Behavior on width {
+                        NumberAnimation { duration: 500; easing.type: Easing.OutQuad }
+                    }
+                }
+
+                // 3. The Content Layer (Stays completely static and un-cramped)
+                Row {
+                    id: layoutRow
+                    anchors.verticalCenter: parent.verticalCenter 
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    spacing: 4
+
+                    Text {
+                        text: wsId + "."
+                        color: delegateRoot.isActive ? theme.colCyan : theme.colBlue
+                        font { pixelSize: 14; bold: true }
+                        renderType: Text.NativeRendering
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    ListView {
+                        model: ws.toplevels
+                        height: parent.height
+                        implicitWidth: contentWidth
+                        anchors.verticalCenter: parent.verticalCenter
+                        orientation: ListView.Horizontal
+                        interactive: false
+                        spacing: 6
+                        leftMargin: 2
+
+                        delegate: Item {
+                            width: 16
+                            height: 16
+                            Image {
+                                anchors.fill: parent
+                                fillMode: Image.PreserveAspectFit
+                                source: Icons.getAppIcon(modelData.wayland?.appId || "")
+                                sourceSize.width: 16
+                                sourceSize.height: 16
+                                smooth: false
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+
+                        add: Transition {
+                            NumberAnimation { property: "y"; from: 5; to: 0; duration: 300; easing.type: Easing.OutQuad }
+                            NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 300; easing.type: Easing.OutQuad }
+                            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
+                        }
+
+                        remove: Transition {
+                            ParallelAnimation {
+                                NumberAnimation { property: "width"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
+                                NumberAnimation { property: "opacity"; to: 0.0; duration: 200 }
+                            }
+                        }
+                    }
                 }
 
                 MouseArea {

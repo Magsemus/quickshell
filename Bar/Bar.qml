@@ -71,9 +71,10 @@ Scope {
                     renderType: Text.NativeRendering
 
                     horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
                     
-                    readonly property string realTitle: Hyprland.activeToplevel ? (Hyprland.activeToplevel.title || "Window") : ""
+                    readonly property string realTitle: Hyprland.activeToplevel ? (Hyprland.activeToplevel.title || "Window") : "  Desktop"
 
                     Component.onCompleted: text = realTitle
 

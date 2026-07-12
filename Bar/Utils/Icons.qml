@@ -4,11 +4,11 @@ import QtQuick
 import Quickshell
 import "Icons.js" as IconData
 
-Singleton 
+QtObject
 {
     property var iconMap: IconData.icons
 
-    function getTrayIcon(id: string, icon: string): string
+    function getTrayIcon(id, icon = ""): string
     {
         let lowerId = id ? id.toLowerCase() : "";
         let lowerIcon = icon ? icon.toLowerCase() : "";
@@ -32,11 +32,37 @@ Singleton
         }
 
         // 3. Fallback for native/standard apps (like Discord)
-        return icon;
+        if (icon != "") return icon;
+        else return getArchIcon();
     }
 
     function getArchIcon() : string
     {
         return iconMap["arch"]
+    }
+
+    function getAppIcon(appId) {
+        if (!appId || appId === "") {
+            return iconMap["arch"]; 
+        }
+
+        let cleanId = appId.toLowerCase();
+
+        if (cleanId === "steam")
+        {
+            let steamIcon = getTrayIcon(cleanId)
+
+            if (steamIcon != getArchIcon()) return steamIcon
+        }
+
+        // Quickshell.iconPath(name, check) -> setting 'true' returns an empty string 
+        // instead of a broken/missing texture if the app icon doesn't exist in the theme
+        let entry = DesktopEntries.heuristicLookup(cleanId);
+        if (entry && entry.icon) {
+            return Quickshell.iconPath(entry.icon);
+        }
+
+        // If the system theme doesn't have an icon matching the app ID, fallback to Arch
+        return iconMap["arch"];
     }
 }
