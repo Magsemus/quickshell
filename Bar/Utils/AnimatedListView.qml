@@ -4,9 +4,11 @@ ListView {
     id: baseList
 
     add: Transition {
-        NumberAnimation { property: "y"; from: 5; to: 0; duration: 300; easing.type: Easing.OutQuad }
-        NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 300; easing.type: Easing.OutQuad }
-        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
+        ParallelAnimation {
+            NumberAnimation { property: "y"; from: 5; to: 0; duration: 250; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "scale"; from: 0.0; to: 1.0; duration: 250; easing.type: Easing.OutQuad }
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
+        }
     }
 
     remove: Transition {
@@ -16,11 +18,10 @@ ListView {
         }
     }
 
-    displaced: Transition {
-        NumberAnimation {
-            properties: "x,y"
-            duration: 250
-            easing.type: Easing.InOutQuad
-        }
+    Component.onCompleted: {
+        opacity = 1.0
+        scale = 1.0
     }
+
+    reuseItems: false
 }

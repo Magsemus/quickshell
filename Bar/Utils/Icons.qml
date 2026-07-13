@@ -2,11 +2,14 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import "Icons.js" as IconData
+import Quickshell.Io
 
-QtObject
+Scope
 {
-    property var iconMap: IconData.icons
+    property var iconMap: [
+        "spotify",
+        "steam"
+    ]
 
     function getTrayIcon(id, icon = ""): string
     {
@@ -14,11 +17,12 @@ QtObject
         let lowerIcon = icon ? icon.toLowerCase() : "";
 
         // 1. Point directly to the Flatpak exported full-color SVG assets
-        for (let key in iconMap)
+        for (let i = 0 ; i < iconMap.length ; i++)
         {
-            if (lowerId.includes(key) || lowerIcon.includes(key))
+            if (lowerId.includes(iconMap[i]) || lowerIcon.includes(iconMap[i]))
             {
-                return iconMap[key];
+                //console.log(iconMap[i]);
+                return getAppIcon(iconMap[i]);
             }
         }
 
@@ -33,27 +37,22 @@ QtObject
 
         // 3. Fallback for native/standard apps (like Discord)
         if (icon != "") return icon;
-        else return getArchIcon();
+        else return Quickshell.iconPath("application-x-executable")
     }
 
     function getArchIcon() : string
     {
-        return iconMap["arch"]
+        return "file:///home/magse/.config/quickshell/Bar/Utils/Files/icons8-arch-linux.svg"
     }
 
     function getAppIcon(appId) {
-        if (!appId || appId === "") {
-            return iconMap["arch"]; 
+        
+        if (!appId || appId.trim() === "") {
+            return Quickshell.iconPath("window_new")
+            //"file:///usr/share/icons/breeze-dark/apps/24/utilities-terminal.svg"
         }
 
         let cleanId = appId.toLowerCase();
-
-        if (cleanId === "steam")
-        {
-            let steamIcon = getTrayIcon(cleanId)
-
-            if (steamIcon != getArchIcon()) return steamIcon
-        }
 
         // Quickshell.iconPath(name, check) -> setting 'true' returns an empty string 
         // instead of a broken/missing texture if the app icon doesn't exist in the theme
@@ -63,6 +62,6 @@ QtObject
         }
 
         // If the system theme doesn't have an icon matching the app ID, fallback to Arch
-        return iconMap["arch"];
+        return Quickshell.iconPath("application-x-executable")
     }
 }

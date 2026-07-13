@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick // for Text
 import QtQuick.Layouts
+import Quickshell.Widgets
 import "../../ColorSchemes"
 import "../Utils"
 
@@ -139,7 +140,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    AnimatedListView {
+                    ListView {
                         model: ws.toplevels
                         height: parent.height
                         implicitWidth: contentWidth
@@ -150,16 +151,30 @@ Item {
                         leftMargin: 2
 
                         delegate: Item {
+                            id: iconItem
+
                             width: 16
-                            height: 16
-                            Image {
+                            height: 16   
+
+                            scale: 1.0
+                            opacity: 1.0
+                            
+                            IconImage {
                                 anchors.fill: parent
-                                fillMode: Image.PreserveAspectFit
                                 source: Icons.getAppIcon(modelData.wayland?.appId || "")
-                                sourceSize.width: 16
-                                sourceSize.height: 16
                                 smooth: false
                                 anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                            // Trigger the intro animation immediately upon creation
+                            Component.onCompleted: {
+                                birthAnimation.start()
+                            }
+    
+                            ParallelAnimation {
+                                id: birthAnimation
+                                NumberAnimation { target: iconItem; property: "y"; from: 5; to: 0; duration: 250; easing.type: Easing.OutQuad }
+                                NumberAnimation { target: iconItem; property: "scale"; from: 0.0; to: 1.0; duration: 250; easing.type: Easing.OutQuad }
+                                NumberAnimation { target: iconItem; property: "opacity"; from: 0.0; to: 1.0; duration: 250 }
                             }
                         }
                     }

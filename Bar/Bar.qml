@@ -19,7 +19,7 @@ Scope {
             left: true
             right: true
         }
-        implicitHeight: 50
+        implicitHeight: 40
         color: "transparent"
 
         Rectangle 
@@ -27,10 +27,11 @@ Scope {
             id: backgroundRect
             anchors.margins: 1
             anchors.topMargin: 20
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
             
             width: parent.width - 10
-            height: parent.height - 20
+            height: 30
             radius: 12
 
             color: theme.colDarkBlue

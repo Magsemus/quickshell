@@ -49,4 +49,12 @@ AnimatedListView {
             }
         }
     }
+
+    displaced: Transition {
+        NumberAnimation {
+            properties: "x,y"
+            duration: 250
+            easing.type: Easing.InOutQuad
+        }
+    }
 }
