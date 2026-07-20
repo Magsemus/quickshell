@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell.Widgets
 import "../../ColorSchemes"
 import "../Utils"
+import "./Base"
 
 Item {   
     id: root
@@ -64,7 +65,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: workspaceList.contentWidth + workspaceList.leftMargin + workspaceList.rightMargin      
         height: workspaceList.implicitHeight + 2
-        radius: 12
+        radius: 9
         color: theme.colLightBlue
 
         Behavior on width {
@@ -80,7 +81,7 @@ Item {
             orientation: ListView.Horizontal
 
             spacing: 5
-            implicitHeight: 18
+            implicitHeight: 24
 
             leftMargin: 15
             rightMargin: 15
@@ -88,6 +89,7 @@ Item {
             anchors.fill: parent
             anchors.verticalCenter: parent.verticalCenter
             interactive: false 
+            
 
             delegate: Item {
                 id: delegateRoot
@@ -107,7 +109,7 @@ Item {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
-                    radius: 12
+                    radius: 9
                     color: theme.colClickBlue
 
                     // Control the fading separately
@@ -183,6 +185,13 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = " + (wsId) + " })")
+                }
+            }
+            displaced: Transition {
+                NumberAnimation {
+                    properties: "x,y"
+                    duration: 250
+                    easing.type: Easing.InOutQuad
                 }
             }
         }

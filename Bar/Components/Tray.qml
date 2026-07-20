@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import "../Utils"
+import "./Base"
 
 AnimatedListView {
     orientation: ListView.Horizontal

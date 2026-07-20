@@ -4,7 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick // for Text
 import QtQuick.Layouts
-import "../../ColorSchemes"
+import "../../../ColorSchemes"
 
 Rectangle 
 {
@@ -15,7 +15,7 @@ Rectangle
     property bool clickAble: true
     property string animationType: "pop"
 
-    width: 28
+    width: iconContainer.width
     height: 20
     radius: 16
 
@@ -49,7 +49,9 @@ Rectangle
     
     Item {
         id: iconContainer
-        anchors.fill: parent
+        implicitWidth: iconText.width + 15
+        implicitHeight: parent.height
+        anchors.centerIn: parent
 
         Text
         {

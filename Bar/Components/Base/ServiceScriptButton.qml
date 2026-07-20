@@ -11,7 +11,7 @@ Item
     property string scriptPath: ""
     property var procAction: function(line) { console.log("No action assigned for scriptProc") }
     property string textIcon: ""
-    property string buttonAnimationType: "popup"
+    property string buttonAnimationType: "pop"
 
     function triggerIconUpdate(nextIcon) {
         button.updateIcon(nextIcon);
