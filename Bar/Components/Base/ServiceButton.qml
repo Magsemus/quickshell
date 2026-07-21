@@ -12,6 +12,7 @@ Rectangle
 
     property string activeIcon: ""
     property var onClickedAction: function () { console.log("No action defined") }
+    property var onMouseHoverExit: function () {}
     property bool clickAble: true
     property string animationType: "pop"
 
@@ -131,6 +132,13 @@ Rectangle
             if (!root.clickAble)
             {
                 root.onClickedAction()
+            }
+        }
+
+        onExited: {
+            if (!root.clickAble)
+            {
+                root.onMouseHoverExit()
             }
         }
 

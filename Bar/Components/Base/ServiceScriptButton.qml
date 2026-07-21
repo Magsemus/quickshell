@@ -8,6 +8,7 @@ Item
     height: button.height
 
     property var clickedAction: function() { console.log("No action assigned for the onClickedAction") }
+    property var mouseHoverExit: function() {}
     property string scriptPath: ""
     property var procAction: function(line) { console.log("No action assigned for scriptProc") }
     property string textIcon: ""
@@ -22,6 +23,7 @@ Item
         activeIcon: textIcon
         onClickedAction: clickedAction
         clickAble: false
+        onMouseHoverExit: mouseHoverExit
         animationType: buttonAnimationType
     }
 

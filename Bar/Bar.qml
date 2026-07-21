@@ -30,8 +30,11 @@ Rectangle
     color: theme.colDarkBlue
 
     property PanelWindow mainWindow 
-
     property BarWidget middleWidget 
+    property BarWidget servicePopup
+    property MouseArea serviceMouseArea
+
+    property RowLayout rightSectionLayout: rightSection
 
     RowLayout {
         id: leftSection
@@ -122,6 +125,9 @@ Rectangle
         anchors.verticalCenter: parent.verticalCenter
         anchors.rightMargin: 12
         spacing: 0
+
+        property Rectangle serviceScriptButtonRectangle: serviceScriptButtonRect
+
         // Add your right-side elements here later (Clock, Battery, Volume, etc.)
 
         Tray { id: tray }
@@ -167,6 +173,8 @@ Rectangle
 
         Rectangle
         {
+            id: serviceScriptButtonRect
+
             Layout.rightMargin: 6
             radius: 6
 
@@ -174,14 +182,65 @@ Rectangle
             height: servicesLayoutRow.height + 0
             color: theme.colLightBlue
 
+            property Row serviceLayoutRowRect: servicesLayoutRow
+
             Row
             {
                 id: servicesLayoutRow
                 anchors.centerIn: parent
 
+                property ServiceScriptButton powerProfileButton: powerProfile
+
+                function getHeightOffset(module) : int
+                {   
+                    if (!module || !parent) return 0;
+
+                    let sum = 0;
+                    let currentParent = module;
+
+                    while (currentParent)
+                    {
+                        sum = sum + currentParent.y;
+                        currentParent = currentParent.parent;
+                    }
+
+                    return (sum + module.height);
+                }
+
                 ServiceScriptButton {
                     id: wifi
-                    clickedAction: function() { console.log("GIGGITY WIFI!")}
+                    clickedAction: function() { 
+                        let Y = servicesLayoutRow.getHeightOffset(this) + 1;
+                        serviceMouseArea.yOffset = servicePopup.y - Y
+
+                        if (servicePopup.contentLoader.source != "../../Popups/WifiPopup.qml") 
+                        { 
+                            servicePopup.contentLoader.source = "../../Popups/WifiPopup.qml";
+                            servicePopup.module = this;
+                            
+                            serviceMouseArea.y = Y;
+                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
+                            serviceMouseArea.hoverEnabled = true
+
+                        }
+                        else
+                        {
+                            servicePopup.height = servicePopup.rectHeight;
+                            serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
+                            serviceMouseArea.hoverEnabled = true
+                        }
+                    }
+                    mouseHoverExit: function () {
+                        if (servicePopup.height > 0)
+                        {
+                            if (!serviceMouseArea.containsMouse)
+                            {
+                                console.log(serviceMouseArea.containsMouse);
+                                servicePopup.height = 0;
+                                serviceMouseArea.height = 0;
+                            }
+                        }
+                    }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_steam.sh"
                     procAction: function(line) {
                         let cleanLine = line.trim();
@@ -216,7 +275,37 @@ Rectangle
 
                 ServiceScriptButton {
                     id: powerProfile
-                    clickedAction: function() { console.log("KONO POWA!")}
+                    clickedAction: function() { 
+                        let Y = servicesLayoutRow.getHeightOffset(this) + 1;
+                        serviceMouseArea.yOffset = servicePopup.y - Y
+
+                        if (servicePopup.contentLoader.source != "../../Popups/PowerProfilesPopup.qml") 
+                        { 
+                            servicePopup.contentLoader.source = "../../Popups/PowerProfilesPopup.qml"
+                            servicePopup.module = this
+
+                            serviceMouseArea.y = Y;
+                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
+                            serviceMouseArea.enabled = true
+                        }
+                        else
+                        {
+                            servicePopup.height = servicePopup.rectHeight;
+                            serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
+                            serviceMouseArea.enabled = true
+                        }
+                    }
+                    mouseHoverExit: function () {
+                        if (servicePopup.height > 0)
+                        {
+                            if (!serviceMouseArea.containsMouse)
+                            {
+                                console.log(serviceMouseArea.containsMouse);
+                                servicePopup.height = 0;
+                                serviceMouseArea.height = 0;
+                            }
+                        }
+                    }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/power_stream.sh"
                     procAction: function(line) {
                         let cleanLine = line.trim();
@@ -296,12 +385,10 @@ Rectangle
             onClickedAction: function () {
                 if (middleWidget.contentLoader.source != "../../Popups/PowerPopup.qml") 
                 { 
-                    console.log("if")
                     middleWidget.contentLoader.source = "../../Popups/PowerPopup.qml"
                 }
                 else 
                 {
-                    console.log("else")
                     middleWidget.contentLoader.source = ""
                 }
             }

@@ -33,6 +33,10 @@ PanelWindow
         {
             item: sidebarContainer
         }
+        Region
+        {
+            item: serviceContainer
+        }
     }
     
     Colorscheme { id: theme }
@@ -42,9 +46,57 @@ PanelWindow
         
         mainWindow: this.mainWindow
         middleWidget: sidebarContainer
+        servicePopup: serviceContainer
+        serviceMouseArea: serviceContainerMouseArea
     }
     
     BarWidget {
         id: sidebarContainer
+
+        anchors.top: bar.bottom
+        anchors.horizontalCenter: bar.horizontalCenter
     }
+
+    BarWidget {
+        id: serviceContainer
+
+        anchors.top: bar.bottom
+    }
+
+    MouseArea {
+        id: serviceContainerMouseArea
+        anchors {
+            left: serviceContainer.left
+            right: serviceContainer.right
+        }
+        hoverEnabled: true
+
+        Behavior on height{
+            NumberAnimation { 
+                duration: 200 
+                easing.type: Easing.OutQuad 
+                onRunningChanged: {
+                    if (!running) {
+                        if (serviceContainerMouseArea.height == 0)
+                        {
+                            hoverEnabled = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        property int yOffset 
+        
+        onEntered: {
+            serviceContainer.height = serviceContainer.rectHeight;
+            height = serviceContainer.rectHeight + yOffset;
+        }
+
+        onExited: {
+            serviceContainer.height = 0;
+            height = 0;
+        }
+    }
+
 }

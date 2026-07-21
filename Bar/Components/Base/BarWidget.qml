@@ -4,6 +4,8 @@ import QtQuick.Shapes
 
 Rectangle 
 {
+    id: popupRect
+
     height: _contentLoader.item ? _contentLoader.item.height : 0
     //color: theme.colDarkBlue // Off-white/cream background matching the image
     color: "transparent"
@@ -12,19 +14,39 @@ Rectangle
     bottomLeftRadius: 12
     bottomRightRadius: 12
 
-    anchors.top: bar.bottom
-    anchors.horizontalCenter: bar.horizontalCenter
-
     property int rectHeight
+    property int rectWidth
+    property var module
 
-    y: this.y + 1
+    x: {
+        if (!module || !parent) return 0;
+
+        let sum = 0;
+        let currentParent = module;
+
+        while (currentParent)
+        {
+            sum = sum + currentParent.x;
+            currentParent = currentParent.parent;
+        }
+
+        let center = sum + module.width/2;
+        
+        return center - rectWidth / 2;
+    }
 
     Behavior on height{
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }
 
     Behavior on width{
-        enabled: sidebarContainer.height > 0
+        enabled: height > 0
+
+        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+    }
+
+    Behavior on x{
+        enabled: height > 0
 
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }
@@ -33,6 +55,8 @@ Rectangle
         id: shape
         width: parent.width
         height: parent.height
+
+        anchors.centerIn: parent
 
         property int arcQuadRad: 10
         property int cornerRad: 15
@@ -50,7 +74,7 @@ Rectangle
             // PathQuad draws the exact curve to the end point (width, height)
             PathQuad {
                 x: shape.arcQuadRad    // End X (x = 0)
-                y: shape.arcQuadRad * shape.height/sidebarContainer.rectHeight       // End Y (y = -1)
+                y: shape.arcQuadRad * shape.height/rectHeight       // End Y (y = -1)
                 controlX: shape.arcQuadRad // Tangent intersection X
                 controlY: 0           // Tangent intersection Y
             }
@@ -81,7 +105,7 @@ Rectangle
 
             PathLine {
                 x: shape.width - shape.arcQuadRad
-                y: shape.arcQuadRad * shape.height/sidebarContainer.rectHeight
+                y: shape.arcQuadRad * shape.height/rectHeight
             }
             
             PathQuad {
@@ -100,8 +124,9 @@ Rectangle
         onItemChanged: {
             if (item != null)
             {
-                sidebarContainer.width = item.width + 20
-                sidebarContainer.rectHeight = item.height
+                popupRect.width = item.width + 20
+                popupRect.rectHeight = item.height
+                popupRect.rectWidth = item.width
             }
         }
 
