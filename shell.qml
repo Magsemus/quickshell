@@ -57,45 +57,60 @@ PanelWindow
         anchors.horizontalCenter: bar.horizontalCenter
     }
 
-    BarWidget {
-        id: serviceContainer
-
-        anchors.top: bar.bottom
-    }
-
-    MouseArea {
+    Item {
         id: serviceContainerMouseArea
+
         anchors {
             left: serviceContainer.left
             right: serviceContainer.right
         }
-        hoverEnabled: true
 
-        Behavior on height{
-            NumberAnimation { 
-                duration: 200 
-                easing.type: Easing.OutQuad 
+        property int yOffset
+
+
+        // Height animation directly on the container Item
+        Behavior on height {
+            NumberAnimation {
+                duration: 200
+                easing.type: Easing.OutQuad
                 onRunningChanged: {
                     if (!running) {
-                        if (serviceContainerMouseArea.height == 0)
-                        {
-                            hoverEnabled = false;
+                        if (serviceContainerMouseArea.height === 0) {
+                            hoverHandler.enabled = false;
                         }
                     }
                 }
             }
         }
 
-        property int yOffset 
-        
-        onEntered: {
-            serviceContainer.height = serviceContainer.rectHeight;
-            height = serviceContainer.rectHeight + yOffset;
+        HoverHandler {
+            id: hoverHandler
         }
 
-        onExited: {
+        property HoverHandler hoveringHandler: hoverHandler
+    }
+
+    BarWidget {
+        id: serviceContainer
+
+        anchors.top: bar.bottom
+
+        HoverHandler {
+            id: panelHover
+        }
+    }
+    
+    property bool isMenuActive: hoverHandler.hovered || panelHover.hovered
+
+    onIsMenuActiveChanged: {
+        if (isMenuActive) {
+            // Expand the menu
+            serviceContainer.height = serviceContainer.rectHeight;
+            serviceContainerMouseArea.height = serviceContainer.rectHeight + serviceContainerMouseArea.yOffset;
+        } else {
+            // Shrink the menu
             serviceContainer.height = 0;
-            height = 0;
+            serviceContainerMouseArea.height = 0;
         }
     }
 

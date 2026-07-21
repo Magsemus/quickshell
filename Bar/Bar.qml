@@ -32,7 +32,7 @@ Rectangle
     property PanelWindow mainWindow 
     property BarWidget middleWidget 
     property BarWidget servicePopup
-    property MouseArea serviceMouseArea
+    property Item serviceMouseArea
 
     property RowLayout rightSectionLayout: rightSection
 
@@ -219,26 +219,22 @@ Rectangle
                             servicePopup.module = this;
                             
                             serviceMouseArea.y = Y;
-                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
-                            serviceMouseArea.hoverEnabled = true
+                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;       
+                            serviceMouseArea.hoveringHandler.enabled = true
 
                         }
                         else
                         {
                             servicePopup.height = servicePopup.rectHeight;
                             serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
-                            serviceMouseArea.hoverEnabled = true
+                            serviceMouseArea.hoveringHandler.enabled = true
                         }
                     }
                     mouseHoverExit: function () {
                         if (servicePopup.height > 0)
                         {
-                            if (!serviceMouseArea.containsMouse)
-                            {
-                                console.log(serviceMouseArea.containsMouse);
-                                servicePopup.height = 0;
-                                serviceMouseArea.height = 0;
-                            }
+                            servicePopup.height = 0;
+                            serviceMouseArea.height = 0;
                         }
                     }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_steam.sh"
@@ -286,24 +282,20 @@ Rectangle
 
                             serviceMouseArea.y = Y;
                             serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
-                            serviceMouseArea.enabled = true
+                            serviceMouseArea.hoveringHandler.enabled = true
                         }
                         else
                         {
                             servicePopup.height = servicePopup.rectHeight;
                             serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
-                            serviceMouseArea.enabled = true
+                            serviceMouseArea.hoveringHandler.enabled = true
                         }
                     }
                     mouseHoverExit: function () {
                         if (servicePopup.height > 0)
                         {
-                            if (!serviceMouseArea.containsMouse)
-                            {
-                                console.log(serviceMouseArea.containsMouse);
-                                servicePopup.height = 0;
-                                serviceMouseArea.height = 0;
-                            }
+                            servicePopup.height = 0;
+                            serviceMouseArea.height = 0;
                         }
                     }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/power_stream.sh"
