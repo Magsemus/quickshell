@@ -177,6 +177,10 @@ Rectangle
             width: servicesLayoutRow.width + 10
             height: servicesLayoutRow.height + 0
             color: theme.colLightBlue
+            
+            Behavior on width{
+                NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+            }
 
             Row
             {

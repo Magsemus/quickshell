@@ -126,7 +126,7 @@ Rectangle
             {
                 popupRect.width = item.width + 20
                 popupRect.rectHeight = item.height
-                popupRect.rectWidth = item.width
+                popupRect.rectWidth = item.width + 20 
             }
         }
 

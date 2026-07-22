@@ -15,6 +15,8 @@ Rectangle
     property var onMouseHoverExit: function () {}
     property bool clickAble: true
     property string animationType: "pop"
+    property bool hoverAble: true
+    property var textColor: theme.colFg
 
     width: iconContainer.width
     height: 20
@@ -22,7 +24,7 @@ Rectangle
 
     Colorscheme { id: theme } 
 
-    color: clickAble ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
+    color: (clickAble && hoverAble) ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
 
     Behavior on color {
         ColorAnimation { duration: 150 }
@@ -59,11 +61,18 @@ Rectangle
             id: iconText
             anchors.centerIn: parent
             text: root.activeIcon
-            color: theme.colFg
+            color: textColor
             font { family: theme.fontFamily; pixelSize: 14; bold: true }
             renderType: Text.NativeRendering
             transformOrigin: Item.Center
             opacity: 1.0
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 300
+                    easing.type: Easing.InOutQuad
+                }
+            }
         }
 
         Text
@@ -71,7 +80,7 @@ Rectangle
             id: incomingText
             anchors.centerIn: parent
             text: root.activeIcon
-            color: theme.colFg
+            color: textColor
             font { family: theme.fontFamily; pixelSize: 14; bold: true }
             renderType: Text.NativeRendering
             transformOrigin: Item.Center

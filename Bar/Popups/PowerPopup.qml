@@ -48,7 +48,7 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    console.log("Log out triggered");
+                    Quickshell.execDetached(["systemctl", "poweroff"])
                     // Example: Quickshell.io.Process.run(["hyprctl", "dispatch", "exit", ""])
                 }
             }
@@ -75,7 +75,7 @@ Item {
             MouseArea {
                 id: mouseArea2
                 anchors.fill: parent
-                onClicked: console.log("Power menu triggered")
+                onClicked: Quickshell.execDetached(["systemctl", "reboot"])
                 hoverEnabled: true
             }
         }
@@ -114,7 +114,7 @@ Item {
             MouseArea {
                 id: mouseArea3
                 anchors.fill: parent
-                onClicked: console.log("Updates triggered")
+                onClicked: Quickshell.execDetached(["systemctl", "suspend"])
                 hoverEnabled: true
             }
         }
@@ -141,7 +141,7 @@ Item {
                 id: mouseArea4
                 anchors.fill: parent
                 onClicked: {
-                    console.log("Reloading shell...");
+                    Quickshell.execDetached(["hyprlock"]);
                     // Quickshell provides automatic hot-reload, but you can assign actions here
                 }
                 hoverEnabled: true

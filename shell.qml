@@ -44,7 +44,7 @@ PanelWindow
     Bar {   
         id: bar
         
-        mainWindow: this.mainWindow
+        mainWindow: mainWindow
         middleWidget: sidebarContainer
         servicePopup: serviceContainer
         serviceMouseArea: serviceContainerMouseArea
