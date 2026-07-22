@@ -34,8 +34,6 @@ Rectangle
     property BarWidget servicePopup
     property Item serviceMouseArea
 
-    property RowLayout rightSectionLayout: rightSection
-
     RowLayout {
         id: leftSection
         anchors.left: parent.left
@@ -126,8 +124,6 @@ Rectangle
         anchors.rightMargin: 12
         spacing: 0
 
-        property Rectangle serviceScriptButtonRectangle: serviceScriptButtonRect
-
         // Add your right-side elements here later (Clock, Battery, Volume, etc.)
 
         Tray { id: tray }
@@ -182,61 +178,18 @@ Rectangle
             height: servicesLayoutRow.height + 0
             color: theme.colLightBlue
 
-            property Row serviceLayoutRowRect: servicesLayoutRow
-
             Row
             {
                 id: servicesLayoutRow
                 anchors.centerIn: parent
-
-                property ServiceScriptButton powerProfileButton: powerProfile
-
-                function getHeightOffset(module) : int
-                {   
-                    if (!module || !parent) return 0;
-
-                    let sum = 0;
-                    let currentParent = module;
-
-                    while (currentParent)
-                    {
-                        sum = sum + currentParent.y;
-                        currentParent = currentParent.parent;
-                    }
-
-                    return (sum + module.height);
-                }
-
-                ServiceScriptButton {
+    
+                ServicePopupButton {
                     id: wifi
-                    clickedAction: function() { 
-                        let Y = servicesLayoutRow.getHeightOffset(this) + 1;
-                        serviceMouseArea.yOffset = servicePopup.y - Y
 
-                        if (servicePopup.contentLoader.source != "../../Popups/WifiPopup.qml") 
-                        { 
-                            servicePopup.contentLoader.source = "../../Popups/WifiPopup.qml";
-                            servicePopup.module = this;
-                            
-                            serviceMouseArea.y = Y;
-                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;       
-                            serviceMouseArea.hoveringHandler.enabled = true
+                    content: "WifiPopup"
+                    servicePopup: backgroundRect.servicePopup
+                    serviceMouseArea: backgroundRect.serviceMouseArea
 
-                        }
-                        else
-                        {
-                            servicePopup.height = servicePopup.rectHeight;
-                            serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
-                            serviceMouseArea.hoveringHandler.enabled = true
-                        }
-                    }
-                    mouseHoverExit: function () {
-                        if (servicePopup.height > 0)
-                        {
-                            servicePopup.height = 0;
-                            serviceMouseArea.height = 0;
-                        }
-                    }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_steam.sh"
                     procAction: function(line) {
                         let cleanLine = line.trim();
@@ -258,6 +211,7 @@ Rectangle
                     }
                     textIcon: "󰤯"
                     buttonAnimationType: "fade"
+
                 }
 
                 ServiceButton { 
@@ -269,35 +223,13 @@ Rectangle
                     clickAble: false
                 }
 
-                ServiceScriptButton {
+                ServicePopupButton {
                     id: powerProfile
-                    clickedAction: function() { 
-                        let Y = servicesLayoutRow.getHeightOffset(this) + 1;
-                        serviceMouseArea.yOffset = servicePopup.y - Y
 
-                        if (servicePopup.contentLoader.source != "../../Popups/PowerProfilesPopup.qml") 
-                        { 
-                            servicePopup.contentLoader.source = "../../Popups/PowerProfilesPopup.qml"
-                            servicePopup.module = this
+                    content: "PowerProfilesPopup"
+                    servicePopup: backgroundRect.servicePopup
+                    serviceMouseArea: backgroundRect.serviceMouseArea
 
-                            serviceMouseArea.y = Y;
-                            serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
-                            serviceMouseArea.hoveringHandler.enabled = true
-                        }
-                        else
-                        {
-                            servicePopup.height = servicePopup.rectHeight;
-                            serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
-                            serviceMouseArea.hoveringHandler.enabled = true
-                        }
-                    }
-                    mouseHoverExit: function () {
-                        if (servicePopup.height > 0)
-                        {
-                            servicePopup.height = 0;
-                            serviceMouseArea.height = 0;
-                        }
-                    }
                     scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/power_stream.sh"
                     procAction: function(line) {
                         let cleanLine = line.trim();
