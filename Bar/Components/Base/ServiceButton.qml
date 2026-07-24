@@ -6,7 +6,7 @@ import QtQuick // for Text
 import QtQuick.Layouts
 import "../../../ColorSchemes"
 
-Rectangle 
+Item
 {
     id: root
 
@@ -14,20 +14,36 @@ Rectangle
     property var onClickedAction: function () { console.log("No action defined") }
     property var onMouseHoverExit: function () {}
     property bool clickAble: true
-    property string animationType: "pop"
     property bool hoverAble: true
+    property string animationType: "pop"
     property var textColor: theme.colFg
+    property bool isCircle: false
+    property int buttonRadius: iconText.width + widthOffset
+    property int cornerRadius: 12
+    property int widthOffset: 0
+    property int heightOffset: 0
+    property Rectangle buttonRect: buttonRect 
 
-    width: iconContainer.width
-    height: 20
-    radius: 16
+    width: iconText.width + widthOffset
+    height: iconText.height + heightOffset
 
-    Colorscheme { id: theme } 
+    Rectangle
+    {
+        id: buttonRect
+        
+        width: isCircle ? buttonRadius : parent.width
+        height: isCircle ? buttonRadius : parent.width
+        radius: isCircle ? 100 * width : cornerRadius
 
-    color: (clickAble && hoverAble) ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
+        anchors.verticalCenter: parent.verticalCenter
 
-    Behavior on color {
-        ColorAnimation { duration: 150 }
+        Colorscheme { id: theme } 
+
+        color: (clickAble || hoverAble) ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 150 }
+        }
     }
     
     function updateIcon(nextIcon)
@@ -49,60 +65,54 @@ Rectangle
             activeIcon = nextIcon;
         }
     }
-    
-    Item {
-        id: iconContainer
-        implicitWidth: iconText.width + 15
-        implicitHeight: parent.height
+
+    Text
+    {
+        id: iconText
         anchors.centerIn: parent
+        text: root.activeIcon
+        color: textColor
+        font { family: "JetBrainsMonoNerdFontPropo-Regular"; pixelSize: 14; bold: true }
+        renderType: Text.NativeRendering
+        transformOrigin: Item.Center
+        opacity: 1.0
 
-        Text
-        {
-            id: iconText
-            anchors.centerIn: parent
-            text: root.activeIcon
-            color: textColor
-            font { family: theme.fontFamily; pixelSize: 14; bold: true }
-            renderType: Text.NativeRendering
-            transformOrigin: Item.Center
-            opacity: 1.0
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 300
-                    easing.type: Easing.InOutQuad
-                }
+        Behavior on color {
+            ColorAnimation {
+                duration: 300
+                easing.type: Easing.InOutQuad
             }
         }
-
-        Text
-        {
-            id: incomingText
-            anchors.centerIn: parent
-            text: root.activeIcon
-            color: textColor
-            font { family: theme.fontFamily; pixelSize: 14; bold: true }
-            renderType: Text.NativeRendering
-            transformOrigin: Item.Center
-            opacity: 0.0
-        }
     }
-    
+
+    Text
+    {
+        id: incomingText
+        anchors.centerIn: parent
+        text: root.activeIcon
+        color: textColor
+        font { family: "JetBrainsMonoNerdFontPropo-Regular"; pixelSize: 14; bold: true }
+        renderType: Text.NativeRendering
+        transformOrigin: Item.Center
+        opacity: 0.0
+    }
+
+
     SequentialAnimation {
         id: popAnimation
-        
+
         // Step A: Shrink the old icon down to nothing
         NumberAnimation { 
             target: iconText; property: "scale"
             to: 0; duration: 150; easing.type: Easing.InQuad 
         }
-        
+
         // Step B: Swap the text string instantly while it is invisible
         PropertyAction { 
             target: root; property: "activeIcon"
             // We pass the new icon dynamically when starting the animation
         }
-        
+
         // Step C: Pop it back up to full size with the spring effect
         NumberAnimation { 
             target: iconText; property: "scale"
@@ -113,17 +123,17 @@ Rectangle
 
     SequentialAnimation {
         id: fadeAnimation
-        
+
         ParallelAnimation {
             NumberAnimation { target: iconText; property: "opacity"; to: 0.0; duration: 200; easing.type: Easing.OutQuad }
             NumberAnimation { target: incomingText; property: "opacity"; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
         }
-        
+
         ScriptAction {
             script: {
                 // Instantly promote the incoming icon value to the primary activeIcon property
                 root.activeIcon = incomingText.text;
-                
+
                 // Instantly snap the opacities back to default states behind the scenes
                 iconText.opacity = 1.0;
                 incomingText.opacity = 0.0;
@@ -136,7 +146,7 @@ Rectangle
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        
+
         onEntered: {
             if (!root.clickAble)
             {

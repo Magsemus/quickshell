@@ -7,6 +7,8 @@ import "../Components/Base"
 
 Item
 {
+    id: powerProfilesPopup
+
     width: column.width + 20
     height: column.height + 20
 
@@ -14,12 +16,55 @@ Item
     
     Colorscheme { id: theme }
 
+    function switchToPerformance() {
+        profileText.text = "Power profile: Performance"
+
+        performance.textColor = theme.colCyan
+        balanced.textColor = theme.colFg
+        powerSaver.textColor = theme.colFg
+
+        circle.x = performance.x + 7
+    }
+
+    function switchToBalanced() {
+        profileText.text = "Power profile: Balanced"
+
+        performance.textColor = theme.colFg
+        balanced.textColor = theme.colCyan
+        powerSaver.textColor = theme.colFg
+
+        circle.x = balanced.x + 6.5
+    }
+
+    function switchToPowerSaver() {
+        profileText.text = "Power profile: power-saver"
+
+        performance.textColor = theme.colFg
+        balanced.textColor = theme.colFg
+        powerSaver.textColor = theme.colCyan
+
+        circle.x = powerSaver.x + 7
+    }
+
     Column
     {        
         id: column
         anchors.centerIn: parent
         spacing: 10
         
+        Text
+        {
+            id: batteryText
+            color: theme.colFg
+            width: 156
+            font { family: theme.fontFamily; pixelSize: 10; bold: true }
+            renderType: Text.NativeRendering
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
         Text
         {
             id: profileText
@@ -36,21 +81,21 @@ Item
         Rectangle {
             id: selectionRect
 
-            width: selectionRow.width + 10
-            height: selectionRow.height + 10
+            width: selectionRow.width + 14
+            height: selectionRow.height + 14
             radius: 24
 
             anchors.horizontalCenter: parent.horizontalCenter
 
             color: theme.colLightBlue
+
+            property int sharedRadius: 27
                 
             Shape {
                 id: circle
 
-                width: selectionRow.height + 6
-                height: selectionRow.height + 6
-
-                x: 42
+                width: selectionRect.sharedRadius
+                height: selectionRect.sharedRadius
 
                 anchors.verticalCenter: parent.verticalCenter
                 preferredRendererType: Shape.CurveRenderer
@@ -82,34 +127,48 @@ Item
 
                 ServiceButton {
                     id: performance
-                    activeIcon: "\u200A\u2001"
+                    activeIcon: ""
                     onClickedAction: function () {
-                        Quickshell.execDetached(["powerprofilesctl", "set", "performance"])
-                        console.log(performance.x)
+                        Quickshell.execDetached(["powerprofilesctl", "set", "performance"]);
+                        powerProfilesPopup.switchToPerformance();
+                        console.log(performance.height + " : " + performance.width)
                     }
-                    hoverAble: false
+                    hoverAble: true
+                    isCircle: true
+                    buttonRadius: selectionRect.sharedRadius
                     width: 28
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 ServiceButton {
                     id: balanced
                     activeIcon: ""
                     onClickedAction: function () {
-                        Quickshell.execDetached(["powerprofilesctl", "set", "balanced"])
-                        console.log(balanced.x)
+                        Quickshell.execDetached(["powerprofilesctl", "set", "balanced"]);
+                        powerProfilesPopup.switchToBalanced();
+                        console.log(balanced.height + " : " + balanced.width)
                     }
-                    hoverAble: false
+                    hoverAble: true
+                    isCircle: true
+                    buttonRadius: selectionRect.sharedRadius
+                    buttonRect.x: -0.5
                     width: 28
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 ServiceButton {
                     id: powerSaver
                     activeIcon: "󰌪"
                     onClickedAction: function () {
-                        Quickshell.execDetached(["powerprofilesctl", "set", "power-saver"])
+                        Quickshell.execDetached(["powerprofilesctl", "set", "power-saver"]);
+                        powerProfilesPopup.switchToPowerSaver();
+                        console.log(powerSaver.buttonRadius)
                     }
-                    hoverAble: false
+                    hoverAble: true
+                    isCircle: true
+                    buttonRadius: selectionRect.sharedRadius
                     width: 28
+                    anchors.verticalCenter: parent.verticalCenter
                 }
             }
         }
@@ -128,38 +187,40 @@ Item
             onRead: (line) => {
                 switch (line) {
                     case "":
-                        profileText.text = "Power profile: Performance"
-
-                        performance.textColor = theme.colCyan
-                        balanced.textColor = theme.colFg
-                        powerSaver.textColor = theme.colFg
-                    
-                        circle.x = performance.x + 8
-                        break
+                        powerProfilesPopup.switchToPerformance();
+                        break;
                     case "":
-                        profileText.text = "Power profile: Balanced"
-
-                        performance.textColor = theme.colFg
-                        balanced.textColor = theme.colCyan
-                        powerSaver.textColor = theme.colFg
-
-                        circle.x = balanced.x + 5
-                        break
+                        powerProfilesPopup.switchToBalanced();
+                        break;
                     case "󰌪":
-                        profileText.text = "Power profile: power-saver"
-
-                        performance.textColor = theme.colFg
-                        balanced.textColor = theme.colFg
-                        powerSaver.textColor = theme.colCyan
-                
-                        circle.x = powerSaver.x + 5 
-                        break
+                        powerProfilesPopup.switchToPowerSaver();
+                        break;
                     default: 
-                        profileText.text = "Power profile: unknown"
-                        break
+                        profileText.text = "Power profile: unknown";
+                        break;
 
                 }
             }
         }
     }
+
+    Process {
+        id: batteryCheck
+        command: ["bash", "-c", "cat /sys/class/power_supply/BAT0/present 2>/dev/null || echo 'No battery'"]
+
+        // 2. Capture standard output
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let output = text.trim()
+
+                if (output === "1") {
+                    console.log("Battery connected!")
+                } else {
+                    batteryText.text = "No battery connected"
+                }
+            }
+        }
+    }
+
+    Component.onCompleted: batteryCheck.running = true
 }

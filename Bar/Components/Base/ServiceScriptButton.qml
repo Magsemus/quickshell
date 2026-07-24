@@ -13,6 +13,7 @@ Item
     property var procAction: function(line) { console.log("No action assigned for scriptProc") }
     property string textIcon: ""
     property string buttonAnimationType: "pop"
+    property ServiceButton serviceButton: button
 
     function triggerIconUpdate(nextIcon) {
         button.updateIcon(nextIcon);

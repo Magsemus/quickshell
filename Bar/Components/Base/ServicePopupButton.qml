@@ -30,6 +30,7 @@ Item {
     property var procAction: function() {}
     property string textIcon: ""
     property string buttonAnimationType: "pop"
+    property ServiceScriptButton scriptButton: _scriptButton
 
     function triggerIconUpdate(nextIcon) {
         _scriptButton.triggerIconUpdate(nextIcon);
@@ -40,7 +41,7 @@ Item {
         clickedAction: function() { 
             let Y = getHeightOffset(this) + 1;
             serviceMouseArea.yOffset = servicePopup.y - Y
-
+            console.log(_scriptButton.serviceButton.height)
             if (servicePopup.contentLoader.source != "../../Popups/" + content + ".qml") 
             { 
                 servicePopup.contentLoader.source = "../../Popups/" + content + ".qml"
@@ -54,7 +55,7 @@ Item {
             else
             {
                 servicePopup.height = servicePopup.rectHeight;
-                serviceMouseArea.height = servicePopup.rectHeight + (servicePopup.y - Y);
+                serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
                 serviceMouseArea.hoveringHandler.enabled = true
             }
         }

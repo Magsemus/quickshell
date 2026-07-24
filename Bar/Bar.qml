@@ -174,18 +174,17 @@ Rectangle
             Layout.rightMargin: 6
             radius: 6
 
-            width: servicesLayoutRow.width + 10
-            height: servicesLayoutRow.height + 0
+            width: servicesLayoutRow.width + 20
+            height: servicesLayoutRow.height + 2
             color: theme.colLightBlue
-            
-            Behavior on width{
-                NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-            }
 
-            Row
+            Layout.alignment: Qt.AlignVCenter
+
+            RowLayout
             {
                 id: servicesLayoutRow
                 anchors.centerIn: parent
+                spacing: 10
     
                 ServicePopupButton {
                     id: wifi
@@ -215,7 +214,7 @@ Rectangle
                     }
                     textIcon: "󰤯"
                     buttonAnimationType: "fade"
-
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 ServiceButton { 
@@ -225,6 +224,8 @@ Rectangle
                         console.log("GIGGITY BLUETOOTH!")
                     }
                     clickAble: false
+                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.rightMargin: 5
                 }
 
                 ServicePopupButton {
@@ -239,7 +240,12 @@ Rectangle
                         let cleanLine = line.trim();
                         triggerIconUpdate(cleanLine);
                     }
+
                     textIcon: ""
+                    anchors.verticalCenter: parent.verticalCenter
+                    scriptButton.serviceButton.height: 19
+                    scriptButton.serviceButton.width: 14
+                    
                 }
             }
         }
@@ -309,7 +315,7 @@ Rectangle
 
         ServiceButton { 
             id: power 
-            activeIcon: "\u200A\u2001"
+            activeIcon: "\u2001\u200A"
             onClickedAction: function () {
                 if (middleWidget.contentLoader.source != "../../Popups/PowerPopup.qml") 
                 { 
@@ -320,7 +326,10 @@ Rectangle
                     middleWidget.contentLoader.source = ""
                 }
             }
+            isCircle: true
+            buttonRect.x: +2.5
             width: 28
+            Layout.alignment: Qt.AlignVCenter
         }
 
         Timer {
