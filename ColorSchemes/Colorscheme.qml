@@ -4,6 +4,7 @@ QtObject {
     id: root
     property color colBg: "#1a1b26"
     property color colFg: "#a9b1d6"
+    property color colWhite: Qt.rgba(0.6627, 0.6941, 0.8392, 0.5)
     property color colMuted: "#444b6a"
     property color colCyan: "#0db9d7"
     property color colBlue: "#7aa2f7"
