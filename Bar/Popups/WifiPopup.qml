@@ -15,7 +15,7 @@ Item
         id: wifiColumn
 
         anchors.centerIn: parent
-        spacing: 5
+        spacing: 10
 
         Text {
             id: wifiName
@@ -134,7 +134,12 @@ Item
                 }
             }
         }
-        SpeedOMeter { id: reciever }
+        SpeedOMeter { 
+            id: reciever 
+            progress: 0
+
+            anchors.topMargin: 10
+        }
     }
 
     Process {
@@ -156,6 +161,10 @@ Item
             let signalNumber = stdoutList[5].match(/-?\d+/g);
             signalBar.value = signalBar.maxValue + (Number(signalNumber) + 30);
             signalText.text = signalNumber + " dbm";
+
+            let RX = Number(stdoutList[6].match(/-?\d+/g)[0]) / 8;
+            reciever.progress = reciever.speedToProgress(RX.toFixed(1))
+            reciever.currentMeasurement.text = RX.toFixed(1)
         }
     }
 
