@@ -1,15 +1,22 @@
 import Quickshell 
 import QtQuick
 import Quickshell.Io
+import Quickshell.Widgets
 import "./Components"
 import "../../ColorSchemes"
 
 Item
 {
-    width: wifiColumn.width + 30
+    width: wifiColumn.width + 50
     height: wifiColumn.height + 10
 
     Colorscheme { id: theme }
+
+    property var iB: [
+        "KiB",
+        "MiB",
+        "GiB"
+    ]
 
     Column {
         id: wifiColumn
@@ -21,131 +28,531 @@ Item
             id: wifiName
             color: theme.colFg
             width: 156
-            font { family: theme.fontFamily; pixelSize: 12; bold: true }
+            font { family: theme.fontFamily; pixelSize: 14; bold: true }
             renderType: Text.NativeRendering
             anchors.horizontalCenter: parent.horizontalCenter
 
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
         }
-        
-        Rectangle
-        {
-            width: signalColumn.width + 20
-            height: signalColumn.height + 10
-            radius: 12
 
-            color: theme.colLightBlue
-            
+        Row {
+            spacing: 10
+
             Column
             {
-                id: signalColumn
-                anchors.centerIn: parent
-                spacing: 5
+                id: wifiInfoColumn
+                spacing: 10
 
-                Text {
-                    id: signalTitle
-                    color: theme.colFg
-                    width: 156
-                    font { family: theme.fontFamily; pixelSize: 11; bold: true }
-                    renderType: Text.NativeRendering
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "󰀂 Signal level"
+                Rectangle {
+                    width: 265
+                    height: rxColumn.height + 10
+                    radius: 12
 
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                    color: theme.colLightBlue
 
-                Row
-                {
-                    id: signalRow
-                    spacing: 5
-
-                    bottomPadding: 5
-
-                    ProgressBar {
-                        id: signalBar
-
-                        width: 150
-                        height: 25
-                        color: theme.colWhite
-
-                        innerRectColor: theme.colFg
-
-                        maxValue: 70
-                        value: 4
+                    Column
+                    {
+                        id: rxColumn
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 10
 
                         Text {
-                            id: signalText
-                            color: theme.colDarkBlue
-                            width: 156
-                            font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                            id: rxTitle
+                            text: "RX"
+
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 14; bold: true }
                             renderType: Text.NativeRendering
-                            anchors.centerIn: parent
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Row {
+                            spacing: 25
+
+                            SpeedOMeter { 
+                                id: reciever 
+                                progress: 0
+
+                                anchors.topMargin: 10
+                            }
+
+                            Column
+                            {
+                                spacing: 7.5
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Row {
+                                    spacing: 5
+
+                                    IconImage{
+                                        width: rxPackageMeasurement.height
+                                        height: rxPackageMeasurement.height
+                                        source: Qt.resolvedUrl("../Utils/Files/package.svg")
+                                        mipmap: true
+                                        smooth: true
+                                    }
+
+                                    Text {
+                                        id: rxPackageMeasurement
+                                        text: "4k (2.64 MiB)"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                                Row {
+                                    spacing: 5
+
+                                    IconImage {
+                                        width: rxPackageDroppedMeasurement.height
+                                        height: rxPackageDroppedMeasurement.height + 2
+                                        source: Qt.resolvedUrl("../Utils/Files/package-dropped.svg")
+                                        mipmap: true
+                                        smooth: true
+                                    }
+
+                                    Text {
+                                        id: rxPackageDroppedMeasurement
+                                        text: "126 (0.96%)"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+
+                                Row {
+                                    spacing: 7.5
+                                    Text {
+                                        id: expectedSpeedIcon
+                                        text: "󰓅"
+                                        
+                                        y: expectedSpeed.y - 5
+                                        x: x - 2.5
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: expectedSpeed.font.pixelSize*1.5; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Text {
+                                        id: expectedSpeed
+                                        text: "30.0 MB/s"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    width: 265
+                    height: txColumn.height + 10
+                    radius: 12
+
+                    color: theme.colLightBlue
+
+                    Column
+                    {
+                        id: txColumn
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 10
+
+                        Text {
+                            id: txTitle
+                            text: "TX"
+
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 14; bold: true }
+                            renderType: Text.NativeRendering
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Row {
+                            spacing: 25
+
+                            SpeedOMeter { 
+                                id: transmiter 
+                                progress: 0
+
+                                anchors.topMargin: 10
+                            }
+
+                            Column
+                            {
+                                spacing: 7.5
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Row {
+                                    spacing: 5
+
+                                    IconImage{
+                                        width: txPackageMeasurement.height
+                                        height: txPackageMeasurement.height
+                                        source: Qt.resolvedUrl("../Utils/Files/package.svg")
+                                        mipmap: true
+                                        smooth: true
+                                    }
+
+                                    Text {
+                                        id: txPackageMeasurement
+                                        text: "4k (2.64 MiB)"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                                Row {
+                                    spacing: 7.5
+
+                                    Text {
+                                        id: txPackageRertyMeasurementIcon
+                                        text: "󰜉"
+
+                                        height: txPackageRertyMeasurement.height
+                                        
+                                        y: txPackageRertyMeasurement.y
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: expectedSpeed.font.pixelSize*1.5; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Text {
+                                        id: txPackageRertyMeasurement
+                                        text: "126 (0.96%)"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+
+                                Row {
+                                    spacing: 10
+
+                                    Text {
+                                        id: txPackageFailureIcon
+                                        text: ""
+                                        
+                                        y: txPackageFailure.y - 4
+                                        x: x + 1
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: expectedSpeed.font.pixelSize*1.5; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Text {
+                                        id: txPackageFailure
+                                        text: "30.0 MB/s"
+
+                                        color: theme.colFg
+                                        font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                                        renderType: Text.NativeRendering
+
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Rectangle {
+                    width: 265
+                    height: routerColumn.height + 10
+                    radius: 12
+
+                    color: theme.colLightBlue
+
+                    Column
+                    {
+                        spacing: 5
+
+                        Text {
+                            id: routerTitel
+                            text: " Connection Details"
+
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                            renderType: Text.NativeRendering
+
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+                        id: routerColumn
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        
+                        Text {
+                            id: router
+                            text: " 2432 MHz : channel 5 : 40 MHz"
+
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                            renderType: Text.NativeRendering
+
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Text {
+                            id: beacons
+                            text: "󰑩 11676   231"
+
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 12; bold: true }
+                            renderType: Text.NativeRendering
 
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
                     }
                 }
+            }
+        
+            Rectangle
+            {
+                id: progressBarRect
 
-                Text {
-                    id: qualityTitle
-                    color: theme.colFg
-                    width: 156
-                    font { family: theme.fontFamily; pixelSize: 11; bold: true }
-                    renderType: Text.NativeRendering
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "󰲝 Link quality"
+                width: progressBarRows.width + 20
+                height: wifiInfoColumn.height
+                radius: 12
 
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                color: theme.colLightBlue
 
                 Row
                 {
-                    id: qualityRow
+                    id: progressBarRows
+                    anchors.centerIn: parent
                     spacing: 5
 
+                    Column {
+                        id: titlesRow
+                        spacing: 5
+
+                        Row {
+                            id: signalRow
+                            spacing: 10
+
+                            Text {
+                                id: right
+                                color: theme.colFg
+                                font { family: theme.fontFamily; pixelSize: 26; bold: true }
+                                renderType: Text.NativeRendering
+                                text: "󰰎"
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            Text {
+                                id: signalTitle
+                                color: theme.colFg
+                                font { family: theme.fontFamily; pixelSize: 13; bold: true }
+                                renderType: Text.NativeRendering
+                                text: "Signal\n󰀂 level"
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+
+                        Rectangle {
+                            id: lineSeperater
+
+                            implicitWidth: qualityRow.width
+                            height: 1
+                            color: theme.colFg
+                        }
+
+                        Row {
+                            id: qualityRow
+                            spacing: 10
+
+                            Text {
+                                id: left
+                                color: theme.colFg
+                                font { family: theme.fontFamily; pixelSize: 26; bold: true }
+                                renderType: Text.NativeRendering
+                                text: "󰰠"
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            Text {
+                                id: qualityTitle
+                                color: theme.colFg
+                                font { family: theme.fontFamily; pixelSize: 13; bold: true }
+                                renderType: Text.NativeRendering
+                                text: " Link\nquality"
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
+
                     ProgressBar {
-                        id: qualityBar
+                        id: signalRectBar
+                        width: 25
+                        height: progressBarRect.height - 10
+                        radius: 1
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        width: 150
-                        height: 25
-                        color: theme.colWhite
-
+                        color: "transparent"
                         innerRectColor: theme.colFg
 
+                        isHorizontal: false
                         maxValue: 70
-                        value: 4
+                        value: 0
 
                         Text {
-                            id: qualityText
+                            id: signalText
                             color: theme.colDarkBlue
-                            width: 156
                             font { family: theme.fontFamily; pixelSize: 11; bold: true }
                             renderType: Text.NativeRendering
-                            anchors.centerIn: parent
+                            text: ""
 
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+
+                            anchors.horizontalCenter: signalRectBar.innerRect.horizontalCenter
+                            property double yOffset: signalRectBar.innerRect.y + signalRectBar.innerRect.height / 2 - height / 2
+                            property double yLimit: signalRectBar.height - height
+                            y: (yOffset > yLimit) ? yLimit : yOffset
+
+                            Behavior on y {
+                                NumberAnimation { duration: 50; easing.type: Easing.OutQuad }
+                            }
                         }
-                    } 
+                    }
+
+                    ProgressBar {
+                        id: qualityRectBar
+                        width: 25
+                        height: progressBarRect.height - 10
+                        radius: 1
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        color: "transparent"
+                        innerRectColor: theme.colFg
+
+                        isHorizontal: false
+                        maxValue: 70
+                        value: 0
+
+                        Column {
+                            anchors.horizontalCenter: qualityRectBar.innerRect.horizontalCenter
+                            property double yOffset: qualityRectBar.innerRect.y + qualityRectBar.innerRect.height / 2 - height / 2
+                            property double yLimit: qualityRectBar.height - height
+                            y: (yOffset > yLimit) ? yLimit : yOffset
+
+                            Behavior on y {
+                                NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
+                            }
+
+                            Text {
+                                id: qualityText
+                                color: theme.colDarkBlue
+                                font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                                renderType: Text.NativeRendering
+                                text: ""
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            Text {
+                                id: dashText
+                                color: theme.colDarkBlue
+                                font { family: theme.fontFamily; pixelSize: 16; bold: true }
+                                renderType: Text.NativeRendering
+                                text: ""
+
+                                height: 5
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+
+                                x: -3
+
+
+                            }
+
+                            Text {
+                                id: seventyText
+                                color: theme.colDarkBlue
+                                font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                                renderType: Text.NativeRendering
+                                text: "70"
+
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
                 }
             }
         }
-        SpeedOMeter { 
-            id: reciever 
-            progress: 0
+    }
 
-            anchors.topMargin: 10
+    property var iBconvertion: function(x) {
+        let i = -1 ;
+        while (true)
+        {
+
+            if (x < Math.pow(2, (i + 2) * 10)) 
+            {
+                x = x / Math.pow(2, (i + 1) * 10);
+                break;
+            }
+
+            i++;
         }
+        if (i == -1) return String(x.toFixed(2));
+        else return x.toFixed(2) + " " + iB[i];  
     }
 
     Process {
         id: wifiShellCommand
-        command: ["bash", "-c", "iw dev wlp0s20f0u3 link"]
-
+        command: ["bash", "-c", "echo \"SSID: $(iw dev wlp0s20f0u3 link | awk -F': ' '/SSID/{print $2}')\" && iw dev wlp0s20f0u3 station dump"]
         // 2. Capture standard output
         stdout: StdioCollector {
             id: stdoutCollector
@@ -154,17 +561,44 @@ Item
         onExited: (code, status) => {
             var stdoutList = stdoutCollector.text.trim().split("\n");
 
-            let match = stdoutList[0].match(/\(on\s+([^)]+)\)/);
+            let match = stdoutList[1].match(/\(on\s+([^)]+)\)/);
             let interfaceName = match ? match[1] : "";
-            wifiName.text = stdoutList[1].replace("SSID: ", "").trim() + " | " + interfaceName;
+            wifiName.text = stdoutList[0].replace("SSID: ", "").trim() + " | " + interfaceName;
             
-            let signalNumber = stdoutList[5].match(/-?\d+/g);
-            signalBar.value = signalBar.maxValue + (Number(signalNumber) + 30);
-            signalText.text = signalNumber + " dbm";
+            let signalNumber = stdoutList[19].match(/-?\d+/g);
+            signalRectBar.value = signalRectBar.maxValue + (Number(signalNumber) + 30);
+            signalText.text = signalNumber + "\ndbm";
 
-            let RX = Number(stdoutList[6].match(/-?\d+/g)[0]) / 8;
-            reciever.progress = reciever.speedToProgress(RX.toFixed(1))
-            reciever.currentMeasurement.text = RX.toFixed(1)
+            let RX = Number(stdoutList[24].match(/-?\d+/g)[0]) / 8;
+            reciever.progress = reciever.speedToProgress(RX.toFixed(1));
+            reciever.currentMeasurement.text = RX.toFixed(1);
+
+            let RXPackages = stdoutList[11].match(/-?\d+/g) / 1000;
+            let RXNumberiB = stdoutList[10].match(/-?\d+/g);
+            rxPackageMeasurement.text = RXPackages.toFixed(0) + "k (" + iBconvertion(RXNumberiB) + ")"
+
+            let RXPackagesDrop = stdoutList[18].match(/-?\d+/g)
+            rxPackageDroppedMeasurement.text = RXPackagesDrop + " (" + ((RXPackagesDrop / (RXPackages * 1000)) * 100).toFixed(2) + "%)"  
+
+            expectedSpeed.text = (stdoutList[26].match(/-?\d+(?:\.\d+)?/g) / 8).toFixed(2) + " MB/s"
+            
+            let TX = Number(stdoutList[22].match(/-?\d+/g)[0]) / 8;
+            transmiter.progress = transmiter.speedToProgress(TX.toFixed(1));
+            transmiter.currentMeasurement.text = TX.toFixed(1);
+
+            let TXPackages = stdoutList[13].match(/-?\d+/g) / 1000;
+            let TXNumberiB = stdoutList[12].match(/-?\d+/g);
+            txPackageMeasurement.text = TXPackages.toFixed(0) + "k (" + iBconvertion(TXNumberiB) + ")"
+            
+            let TXRetry = stdoutList[14].match(/-?\d+/g) / 1000
+            txPackageRertyMeasurement.text = TXRetry.toFixed(0) + "k (" + (TXRetry/TXPackages*100).toFixed(2) + "%)"
+
+            txPackageFailure.text = stdoutList[15].match(/-?\d+/g)[0]
+
+            let beaconsRX = stdoutList[17].match(/-?\d+/g)
+            let beaconsLoss = stdoutList[16].match(/-?\d+/g)
+            beacons.text = "󰑩 " + beaconsRX + "   " + beaconsLoss
+            
         }
     }
 
@@ -175,8 +609,22 @@ Item
         // 2. Capture standard output
         stdout: SplitParser{
             onRead: (line) => {
-                qualityBar.value = Number(line) 
-                qualityText.text = line + "/70"
+                qualityRectBar.value = Number(line) 
+                qualityText.text = line
+            }
+        }
+    }
+
+    Process {
+        id: signalFrequencyCommand
+        command: ["bash", "-c", "iw dev wlp0s20f0u3 info | grep \"channel\""]
+
+        // 2. Capture standard output
+        stdout: SplitParser{
+            onRead: (line) => {
+                let numberList = line.match(/-?\d+/g)
+                router.text = " " + numberList[1] + " MHz : Channel " + numberList[0] + " : " + numberList[2] + " MHz"
+
             }
         }
     }
@@ -194,5 +642,6 @@ Item
     Component.onCompleted: {
         wifiShellCommand.running = true
         linkQualityCommand.running = true
+        signalFrequencyCommand.running = true
     }
 }
