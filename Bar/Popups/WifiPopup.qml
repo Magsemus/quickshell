@@ -358,138 +358,63 @@ Item
 
                 color: theme.colLightBlue
 
-                Row
+                Column
                 {
-                    id: progressBarRows
+                    spacing: 0
                     anchors.centerIn: parent
-                    spacing: 5
 
-                    Column {
-                        id: titlesRow
-                        spacing: 5
+                    Text {
+                        id: progressbarTitle
+                        color: theme.colFg
+                        font { family: theme.fontFamily; pixelSize: 13; bold: false }
+                        renderType: Text.NativeRendering
+                        text: " Signal Health"
 
-                        Row {
-                            id: signalRow
-                            spacing: 10
-
-                            Text {
-                                id: right
-                                color: theme.colFg
-                                font { family: theme.fontFamily; pixelSize: 26; bold: true }
-                                renderType: Text.NativeRendering
-                                text: "󰰎"
-
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                            Text {
-                                id: signalTitle
-                                color: theme.colFg
-                                font { family: theme.fontFamily; pixelSize: 13; bold: true }
-                                renderType: Text.NativeRendering
-                                text: "Signal\n󰀂 level"
-
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                        }
-
-                        Rectangle {
-                            id: lineSeperater
-
-                            implicitWidth: qualityRow.width
-                            height: 1
-                            color: theme.colFg
-                        }
-
-                        Row {
-                            id: qualityRow
-                            spacing: 10
-
-                            Text {
-                                id: left
-                                color: theme.colFg
-                                font { family: theme.fontFamily; pixelSize: 26; bold: true }
-                                renderType: Text.NativeRendering
-                                text: "󰰠"
-
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                            Text {
-                                id: qualityTitle
-                                color: theme.colFg
-                                font { family: theme.fontFamily; pixelSize: 13; bold: true }
-                                renderType: Text.NativeRendering
-                                text: " Link\nquality"
-
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                        }
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        topPadding: 5
+                        
                     }
 
-                    ProgressBar {
-                        id: signalRectBar
-                        width: 25
-                        height: progressBarRect.height - 10
-                        radius: 1
-                        anchors.verticalCenter: parent.verticalCenter
+                    Row
+                    {
+                        id: progressBarRows
+                        spacing: 10
 
-                        color: "transparent"
-                        innerRectColor: theme.colFg
-
-                        isHorizontal: false
-                        maxValue: 70
-                        value: 0
+                        height: progressBarRect.height - progressbarTitle.height
 
                         Text {
-                            id: signalText
-                            color: theme.colDarkBlue
-                            font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                            id: signalTitle
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 16; bold: false }
                             renderType: Text.NativeRendering
-                            text: ""
+                            text: "󰀂 Signal level"
+                            height: implicitWidth
+                            width: 16
 
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-
-                            anchors.horizontalCenter: signalRectBar.innerRect.horizontalCenter
-                            property double yOffset: signalRectBar.innerRect.y + signalRectBar.innerRect.height / 2 - height / 2
-                            property double yLimit: signalRectBar.height - height
-                            y: (yOffset > yLimit) ? yLimit : yOffset
-
-                            Behavior on y {
-                                NumberAnimation { duration: 50; easing.type: Easing.OutQuad }
-                            }
+                            y: progressBarRows.height - height - 15
+                            rotation: -90
                         }
-                    }
 
-                    ProgressBar {
-                        id: qualityRectBar
-                        width: 25
-                        height: progressBarRect.height - 10
-                        radius: 1
-                        anchors.verticalCenter: parent.verticalCenter
+                        ProgressBar {
+                            id: signalRectBar
+                            width: 25
+                            height: progressBarRows.height - 10
+                            radius: 1
+                            anchors.verticalCenter: parent.verticalCenter
 
-                        color: "transparent"
-                        innerRectColor: theme.colFg
+                            color: "transparent"
+                            innerRectColor: theme.colFg
 
-                        isHorizontal: false
-                        maxValue: 70
-                        value: 0
-
-                        Column {
-                            anchors.horizontalCenter: qualityRectBar.innerRect.horizontalCenter
-                            property double yOffset: qualityRectBar.innerRect.y + qualityRectBar.innerRect.height / 2 - height / 2
-                            property double yLimit: qualityRectBar.height - height
-                            y: (yOffset > yLimit) ? yLimit : yOffset
-
-                            Behavior on y {
-                                NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
-                            }
+                            isHorizontal: false
+                            maxValue: 70
+                            value: 0
 
                             Text {
-                                id: qualityText
+                                id: signalText
                                 color: theme.colDarkBlue
                                 font { family: theme.fontFamily; pixelSize: 11; bold: true }
                                 renderType: Text.NativeRendering
@@ -497,35 +422,89 @@ Item
 
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
+
+                                anchors.horizontalCenter: signalRectBar.innerRect.horizontalCenter
+                                property double yOffset: signalRectBar.innerRect.y + signalRectBar.innerRect.height / 2 - height / 2
+                                property double yLimit: signalRectBar.height - height
+                                y: (yOffset > yLimit) ? yLimit : yOffset
                             }
+                        }
 
-                            Text {
-                                id: dashText
-                                color: theme.colDarkBlue
-                                font { family: theme.fontFamily; pixelSize: 16; bold: true }
-                                renderType: Text.NativeRendering
-                                text: ""
+                        ProgressBar {
+                            id: qualityRectBar
+                            width: 25
+                            height: progressBarRows.height - 10
+                            radius: 1
+                            anchors.verticalCenter: parent.verticalCenter
 
-                                height: 5
+                            color: "transparent"
+                            innerRectColor: theme.colFg
 
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
+                            isHorizontal: false
+                            maxValue: 70
+                            value: 0
 
-                                x: -3
+                            Column {
+                                anchors.horizontalCenter: qualityRectBar.innerRect.horizontalCenter
+                                property double yOffset: qualityRectBar.innerRect.y + qualityRectBar.innerRect.height / 2 - height / 2
+                                property double yLimit: qualityRectBar.height - height
+                                y: (yOffset > yLimit) ? yLimit : yOffset
+
+                                Text {
+                                    id: qualityText
+                                    color: theme.colDarkBlue
+                                    font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                                    renderType: Text.NativeRendering
+                                    text: ""
+
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                Text {
+                                    id: dashText
+                                    color: theme.colDarkBlue
+                                    font { family: theme.fontFamily; pixelSize: 16; bold: true }
+                                    renderType: Text.NativeRendering
+                                    text: ""
+
+                                    height: 5
+
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+
+                                    x: -3
 
 
+                                }
+
+                                Text {
+                                    id: seventyText
+                                    color: theme.colDarkBlue
+                                    font { family: theme.fontFamily; pixelSize: 11; bold: true }
+                                    renderType: Text.NativeRendering
+                                    text: "70"
+
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                             }
+                        }
 
-                            Text {
-                                id: seventyText
-                                color: theme.colDarkBlue
-                                font { family: theme.fontFamily; pixelSize: 11; bold: true }
-                                renderType: Text.NativeRendering
-                                text: "70"
+                        Text {
+                            id: qualityTitle
+                            color: theme.colFg
+                            font { family: theme.fontFamily; pixelSize: 16; bold: false }
+                            renderType: Text.NativeRendering
+                            text: " Link quality"
+                            height: implicitWidth
+                            width: 16
 
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            y: progressBarRows.height - height - 15
+                            rotation: 270
+
                         }
                     }
                 }
