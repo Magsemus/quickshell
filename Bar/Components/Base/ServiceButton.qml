@@ -24,6 +24,8 @@ Item
     property int heightOffset: 0
     property Rectangle buttonRect: buttonRect 
 
+    Colorscheme { id: theme }
+
     width: iconText.width + widthOffset
     height: iconText.height + heightOffset
 
@@ -36,8 +38,6 @@ Item
         radius: isCircle ? 100 * width : cornerRadius
 
         anchors.verticalCenter: parent.verticalCenter
-
-        Colorscheme { id: theme } 
 
         color: (clickAble || hoverAble) ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
 
@@ -72,7 +72,7 @@ Item
         anchors.centerIn: parent
         text: root.activeIcon
         color: textColor
-        font { family: "JetBrainsMonoNerdFontPropo-Regular"; pixelSize: 14; bold: true }
+        font { family: theme.fontFamily; pixelSize: 14; bold: true }
         renderType: Text.NativeRendering
         transformOrigin: Item.Center
         opacity: 1.0
@@ -91,7 +91,7 @@ Item
         anchors.centerIn: parent
         text: root.activeIcon
         color: textColor
-        font { family: "JetBrainsMonoNerdFontPropo-Regular"; pixelSize: 14; bold: true }
+        font { family: theme.fontFamily; pixelSize: 14; bold: true }
         renderType: Text.NativeRendering
         transformOrigin: Item.Center
         opacity: 0.0

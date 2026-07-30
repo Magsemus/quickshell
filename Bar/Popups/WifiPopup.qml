@@ -47,7 +47,7 @@ Item
                 Rectangle {
                     width: 265
                     height: rxColumn.height + 10
-                    radius: 12
+                    radius: 12 
 
                     color: theme.colLightBlue
 
@@ -531,7 +531,7 @@ Item
 
     Process {
         id: wifiShellCommand
-        command: ["bash", "-c", "echo \"SSID: $(iw dev wlp0s20f0u3 link | awk -F': ' '/SSID/{print $2}')\" && iw dev wlp0s20f0u3 station dump"]
+        command: ["bash", "-c", "echo \"SSID: $(iw dev wlan0 link | awk -F': ' '/SSID/{print $2}')\" && iw dev wlan0 station dump"]
         // 2. Capture standard output
         stdout: StdioCollector {
             id: stdoutCollector
@@ -545,8 +545,8 @@ Item
             wifiName.text = stdoutList[0].replace("SSID: ", "").trim() + " | " + interfaceName;
             
             let signalNumber = stdoutList[19].match(/-?\d+/g);
-            signalRectBar.value = signalRectBar.maxValue + (Number(signalNumber) + 30);
-            signalText.text = signalNumber + "\ndbm";
+            signalRectBar.value = signalRectBar.maxValue + (Number(signalNumber[0]) + 30);
+            signalText.text = signalNumber[0] + "\ndbm";
 
             let RX = Number(stdoutList[24].match(/-?\d+/g)[0]) / 8;
             reciever.progress = reciever.speedToProgress(RX.toFixed(1));
@@ -583,7 +583,7 @@ Item
 
     Process {
         id: linkQualityCommand
-        command: ["bash", "-c", "grep wlp0s20f0u3 /proc/net/wireless | awk '{print int($3)}'"]
+        command: ["bash", "-c", "grep wlan0 /proc/net/wireless | awk '{print int($3)}'"]
 
         // 2. Capture standard output
         stdout: SplitParser{
@@ -596,7 +596,7 @@ Item
 
     Process {
         id: signalFrequencyCommand
-        command: ["bash", "-c", "iw dev wlp0s20f0u3 info | grep \"channel\""]
+        command: ["bash", "-c", "iw dev wlan0 info | grep \"channel\""]
 
         // 2. Capture standard output
         stdout: SplitParser{

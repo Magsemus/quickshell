@@ -2,8 +2,8 @@
 
 get_wifi_status() {
     # Check if connected
-    SSID=$(nmcli -t -f active,ssid dev wifi | grep '^ja:' | cut -d: -f2)
-    SIGNAL=$(nmcli -t -f active,signal dev wifi | grep '^ja:' | cut -d: -f2)
+    SSID=$(nmcli -t -f active,ssid dev wifi | grep -E '^(yes|ja):' | cut -d: -f2)
+    SIGNAL=$(nmcli -t -f active,signal dev wifi | grep -E '^(yes|ja):' | cut -d: -f2)
 
     if [ -z "$SSID" ]; then
         echo "disconnected 0"

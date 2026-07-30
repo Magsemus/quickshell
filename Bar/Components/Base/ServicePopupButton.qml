@@ -39,7 +39,8 @@ Item {
     ServiceScriptButton {
         id: _scriptButton
         clickedAction: function() { 
-            let Y = getHeightOffset(this) + 1;
+            servicePopup.serviceButtonHover = true
+            let Y = getHeightOffset(this);
             serviceMouseArea.yOffset = servicePopup.y - Y
             console.log(_scriptButton.serviceButton.height)
             if (servicePopup.contentLoader.source != "../../Popups/" + content + ".qml") 
@@ -60,7 +61,8 @@ Item {
             }
         }
         mouseHoverExit: function () {
-            if (servicePopup.height > 0)
+            servicePopup.serviceButtonHover = false
+            if (servicePopup.height > 0 && !servicePopup.isBothHovered)
             {
                 servicePopup.height = 0;
                 serviceMouseArea.height = 0;

@@ -98,17 +98,18 @@ PanelWindow
         HoverHandler {
             id: panelHover
         }
+
+        property bool serviceButtonHover: false
+        property bool isBothHovered: isMenuActive
     }
     
     property bool isMenuActive: hoverHandler.hovered || panelHover.hovered
 
     onIsMenuActiveChanged: {
-        if (isMenuActive) {
-            // Expand the menu
-            serviceContainer.height = serviceContainer.rectHeight;
-            serviceContainerMouseArea.height = serviceContainer.rectHeight + serviceContainerMouseArea.yOffset;
-        } else {
+        console.log(serviceContainer.serviceButtonHover + " and " + panelHover.hovered)
+        if (!isMenuActive && !serviceContainer.serviceButtonHover){
             // Shrink the menu
+            console.log("giggity");
             serviceContainer.height = 0;
             serviceContainerMouseArea.height = 0;
         }
