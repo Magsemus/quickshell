@@ -121,13 +121,18 @@ Rectangle
     Loader {
         id: _contentLoader
 
-        onItemChanged: {
-            if (item != null)
+        onHeightChanged: {
+            if (height != 0)
             {
                 popupRect.width = item.width + 20
                 popupRect.rectHeight = item.height
                 popupRect.rectWidth = item.width + 20 
             }
+        }
+
+        onWidthChanged: {
+            popupRect.width = item.width + 20
+            popupRect.rectWidth = item.width + 20 
         }
 
         anchors.centerIn: parent

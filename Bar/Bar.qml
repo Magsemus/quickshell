@@ -23,7 +23,7 @@ Rectangle
     anchors.top: parent.top
     anchors.topMargin: + 10
     
-    width: parent.width - 10
+    width: parent.width - 35
     height: 35
     radius: 12
 
@@ -193,7 +193,7 @@ Rectangle
                     servicePopup: backgroundRect.servicePopup
                     serviceMouseArea: backgroundRect.serviceMouseArea
 
-                    scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_steam.sh"
+                    scriptPath: "/home/magse/.config/quickshell/Bar/Scripts/wifi_stream.sh"
                     procAction: function(line) {
                         let cleanLine = line.trim();
                         let parts = cleanLine.split(" ")
@@ -329,6 +329,7 @@ Rectangle
             isCircle: true
             buttonRect.x: +2.5
             width: 28
+            height: 28
             Layout.alignment: Qt.AlignVCenter
         }
 

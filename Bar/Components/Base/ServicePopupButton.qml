@@ -46,7 +46,6 @@ Item {
             if (servicePopup.contentLoader.source != "../../Popups/" + content + ".qml") 
             { 
                 servicePopup.contentLoader.source = "../../Popups/" + content + ".qml"
-                console.log(servicePopup.contentLoader.source)
                 servicePopup.module = this
 
                 serviceMouseArea.y = Y;
@@ -55,6 +54,7 @@ Item {
             }
             else
             {
+                console.log("testing: " + servicePopup.rectHeight)
                 servicePopup.height = servicePopup.rectHeight;
                 serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
                 serviceMouseArea.hoveringHandler.enabled = true
@@ -64,6 +64,7 @@ Item {
             servicePopup.serviceButtonHover = false
             if (servicePopup.height > 0 && !servicePopup.isBothHovered)
             {
+                console.log(servicePopup.height + " hahah")
                 servicePopup.height = 0;
                 serviceMouseArea.height = 0;
             }

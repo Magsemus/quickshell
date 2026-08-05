@@ -17,12 +17,16 @@ Item
     property bool hoverAble: true
     property string animationType: "pop"
     property var textColor: theme.colFg
+    property var backgroundColor: "transparent"
     property bool isCircle: false
     property int buttonRadius: iconText.width + widthOffset
     property int cornerRadius: 12
     property int widthOffset: 0
     property int heightOffset: 0
     property Rectangle buttonRect: buttonRect 
+    property int pixelSize: 14
+    property bool textInCenter: true
+    property Text textComponent: iconText
 
     Colorscheme { id: theme }
 
@@ -34,12 +38,12 @@ Item
         id: buttonRect
         
         width: isCircle ? buttonRadius : parent.width
-        height: isCircle ? buttonRadius : parent.width
+        height: isCircle ? buttonRadius : parent.height
         radius: isCircle ? 100 * width : cornerRadius
 
         anchors.verticalCenter: parent.verticalCenter
 
-        color: (clickAble || hoverAble) ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : "transparent")) : "transparent"
+        color: clickAble ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : backgroundColor)) : backgroundColor
 
         Behavior on color {
             ColorAnimation { duration: 150 }
@@ -69,10 +73,10 @@ Item
     Text
     {
         id: iconText
-        anchors.centerIn: parent
+        anchors.centerIn: textInCenter ? parent : null
         text: root.activeIcon
         color: textColor
-        font { family: theme.fontFamily; pixelSize: 14; bold: true }
+        font { family: theme.fontFamily; pixelSize: root.pixelSize; bold: true }
         renderType: Text.NativeRendering
         transformOrigin: Item.Center
         opacity: 1.0
@@ -146,6 +150,7 @@ Item
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: root.clickAble ? Qt.PointingHandCursor : null
 
         onEntered: {
             if (!root.clickAble)

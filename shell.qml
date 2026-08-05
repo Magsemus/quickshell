@@ -2,6 +2,7 @@
 import Quickshell // for PanelWindow
 import QtQuick // for Text
 import QtQuick.Layouts
+import Quickshell.Wayland
 import "./Bar"
 import "./Bar/Popups"
 import "./Bar/Components/Base"
@@ -17,7 +18,7 @@ PanelWindow
         right: true
     }
     
-    height: 500
+    implicitHeight: 500
     color: "transparent"
 
     exclusionMode: ExclusionMode.Normal
@@ -38,12 +39,13 @@ PanelWindow
             item: serviceContainer
         }
     }
-    
+
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
     Colorscheme { id: theme }
 
     Bar {   
-        id: bar
-        
+        id: bar      
         mainWindow: mainWindow
         middleWidget: sidebarContainer
         servicePopup: serviceContainer

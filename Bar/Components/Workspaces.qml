@@ -60,6 +60,30 @@ Item {
         // Run once on load to populate the initial list
         Component.onCompleted: dynamicWorkspaceModel.syncModel();
     }
+    
+    property var numberCircles: [
+        "󰲡",
+        "󰲣",
+        "󰲥",
+        "󰲧",
+        "󰲩",
+        "󰲫",
+        "󰲭",
+        "󰲯",
+        "󰲱"
+    ]
+
+    property var filledNumberCircles: [
+        "󰲠",
+        "󰲢",
+        "󰲤",
+        "󰲦",
+        "󰲨",
+        "󰲪",
+        "󰲬",
+        "󰲮",
+        "󰲰"
+    ]
 
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
@@ -131,15 +155,27 @@ Item {
                     id: layoutRow
                     anchors.verticalCenter: parent.verticalCenter 
                     anchors.left: parent.left
-                    anchors.leftMargin: 7
+                    anchors.leftMargin: 5
                     spacing: 4
 
                     Text {
-                        text: wsId + "."
+                        text: delegateRoot.isActive ? root.filledNumberCircles[(wsId - 1)] : root.numberCircles[(wsId - 1)]
                         color: delegateRoot.isActive ? theme.colCyan : theme.colBlue
-                        font { pixelSize: 14; bold: true }
+                        font { pixelSize: 16; bold: true }
                         renderType: Text.NativeRendering
                         anchors.verticalCenter: parent.verticalCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        height: 17.5
+                        
+
+                        Behavior on text {
+                            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200000; easing.type: Easing.OutQuad }
+                        }
+
+                        Behavior on color{
+                            ColorAnimation{ duration: 1000; easing.type: Easing.OutQuad }
+                        }
                     }
 
                     ListView {
@@ -150,7 +186,7 @@ Item {
                         orientation: ListView.Horizontal
                         interactive: false
                         spacing: 6
-                        leftMargin: 2
+                        leftMargin: 3
 
                         delegate: Item {
                             id: iconItem

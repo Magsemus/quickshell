@@ -47,6 +47,7 @@ Item {
                 id: mouseArea1
                 anchors.fill: parent
                 hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     Quickshell.execDetached(["systemctl", "poweroff"])
                     // Example: Quickshell.io.Process.run(["hyprctl", "dispatch", "exit", ""])
@@ -77,6 +78,7 @@ Item {
                 anchors.fill: parent
                 onClicked: Quickshell.execDetached(["systemctl", "reboot"])
                 hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
             }
         }
 
@@ -116,6 +118,7 @@ Item {
                 anchors.fill: parent
                 onClicked: Quickshell.execDetached(["systemctl", "suspend"])
                 hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
             }
         }
 
@@ -145,6 +148,7 @@ Item {
                     // Quickshell provides automatic hot-reload, but you can assign actions here
                 }
                 hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
             }
         }
     }

@@ -20,9 +20,9 @@ get_profile()
 
 get_profile
 
-dbus-monitor --system "type='signal',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',arg0='net.hadess.PowerProfiles'" 2>/dev/null | \
-while read -r line; do
-    if [[ "$line" == *"net.hadess.PowerProfiles"* ]]; then
+gdbus monitor --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles | while read -r line; do
+    # Re-evaluate whenever ActiveProfile or properties update
+    if [[ "$line" == *"PropertiesChanged"* ]] || [[ "$line" == *"ActiveProfile"* ]]; then
         get_profile
     fi
 done
