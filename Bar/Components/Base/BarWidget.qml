@@ -121,6 +121,8 @@ Rectangle
     Loader {
         id: _contentLoader
 
+        property Rectangle backgroundRect: popupRect
+
         onHeightChanged: {
             if (height != 0)
             {

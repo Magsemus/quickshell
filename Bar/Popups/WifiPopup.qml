@@ -11,7 +11,8 @@ import "../Components/Base"
 Item {
     id: root
 
-    width: loader.width
+    width: loader.width 
+    height: loader.height
 
     component StyledText : Text {
         id: wifiDiagnosticsItem
@@ -412,7 +413,7 @@ Item {
                         pixelSize: 24
                         clickAble: true
                         onClickedAction: () => {
-                            //Quickshell.execDetached(["nmcli", "device", "disconnect", wifiDiagnosticsItem.name])
+                            Quickshell.execDetached(["nmcli", "device", "disconnect", wifiDiagnosticsItem.name])
                             loader.sourceComponent = wifiConnectionNames
                             console.log("TEST!!!! " + root.width)
                         }
@@ -614,9 +615,13 @@ Item {
                         // React immediately when NetworkManager fires a DBus signal event
                         if ((line.includes("StateChanged") || line.includes("PropertiesChanged")) && (line.includes("20") || line.includes("70"))) {
                             // Update state cleanly without overflowing DBus
-
                             checkStatusProc.running = true
-
+                            
+                            // Update the interface name when connected to wifi
+                            if (line.includes("70"))
+                            {
+                                interfaceName.running = true
+                            }
                         }
                     }
                 }
@@ -658,7 +663,7 @@ Item {
         {
             id: wifiConnectionNamesItem
             width: 350
-            height: (root.height == 0) ? wifiConnectionNamesColumn.height : root.height
+            height: (root.heightOfBackgroundRect > 0) ? root.height : wifiConnectionNamesColumn.height
 
             Column {
                 id: wifiConnectionNamesColumn
@@ -712,11 +717,33 @@ Item {
                             ServiceButton {
                                 activeIcon: scrollView.listOfNames[index]
                                 onClickedAction: () => {
-                                    loader.sourceComponent = wifiConnectPanel
+                                    //loader.sourceComponent = wifiConnectPanel
+                                    connectToNetwork.running = true
                                 }
                                 width: scrollView.width
                                 textInCenter: false
                                 textComponent.x: 7
+
+                                Process {
+                                    id: connectToNetwork
+
+                                    command: ["bash", "-c", `nmcli device wifi connect "${activeIcon}"`]
+
+                                    stdout: StdioCollector {
+                                        id: stdoutCollector
+                                    }
+
+                                    onExited: (code, status) => {
+                                        if (stdoutCollector.text.includes("successfully activated")) {
+                                            loader.sourceComponent = wifiDiagnostics
+                                            root.height = loader.height
+                                        }
+                                        else {
+                                            networkName = activeIcon
+                                            loader.sourceComponent = wifiConnectPanel
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -739,6 +766,17 @@ Item {
         }
     }
 
+    property var heightOfBackgroundRect: parent.backgroundRect.height
+
+    onHeightOfBackgroundRectChanged: {
+        if (parent.backgroundRect.height == 0 && loader.sourceComponent == wifiConnectPanel) {
+            loader.sourceComponent = wifiConnectionNames
+            parent.backgroundRect.rectHeight = loader.height
+        }
+    }
+
+    property string networkName
+
     Component {
         id: wifiConnectPanel
 
@@ -747,6 +785,26 @@ Item {
 
             width: root.width
             height: root.height
+
+            Process {
+                id: connectToNetworkWithPassword
+
+                command: ["bash", "-c", `nmcli device wifi connect "${root.networkName}" password "${textInput.text}"`]
+
+                stdout: StdioCollector {
+                    id: stdoutCollector
+                }
+
+                onExited: (code, status) => {
+                    console.log("TRYING TO CONNECT")
+                    if (!stdoutCollector.text.includes("successfully activated")) {
+                        textInput.text = ""
+
+                        textInputInnerText.text = "Wrong password"
+                        color: "#FF0000"
+                    }
+                }
+            }
 
             Column
             {
@@ -777,6 +835,7 @@ Item {
                         echoMode: checkMark.marked ? TextInput.Normal : TextInput.Password
 
                         Text {
+                            id: textInputInnerText
                             text: "Type the wifi password here"
                             color: "#6c7086"
                             font: parent.font
@@ -784,14 +843,14 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         onAccepted: {
-                            console.log("Captured input:", textInput.text)
+                            parent.forceActiveFocus();
+                            connectToNetworkWithPassword.running = true;
                         }
                     }
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            textInput.forceActiveFocus()
-                            
+                            textInput.forceActiveFocus();
                         }
                         //z: -1 // Sits behind TextInput so selection still works
                     }
@@ -805,7 +864,8 @@ Item {
                         id: checkMark 
                         width: 20
                         height: 20
-                        anchors.leftMargin: 20
+                        radius: 4
+                        x:10
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
@@ -814,6 +874,9 @@ Item {
                         activeIcon: "connect"
                         backgroundColor: theme.colLightBlue
                         widthOffset: 20
+                        onClickedAction: () => {
+                            connectToNetworkWithPassword.running = true;
+                        }
                     }
                 }
             }
@@ -824,7 +887,7 @@ Item {
         id: loader
 
         anchors.centerIn: parent
-        sourceComponent: wifiDiagnostics
+        //sourceComponent: wifiDiagnostics
 
         onWidthChanged: {
             root.width = width
@@ -833,8 +896,73 @@ Item {
 
     Component.onCompleted: {
         //root.width = loader.width
-        root.height = loader.height
+        checkConnectionProcess.running = true
+    }
 
-        //loader.sourceComponent = wifiConnectPanel
+    property bool connected: false
+
+    Process {
+        id: nmcliDBusListenerForComponents
+
+        // Monitor DBus system signals for NetworkManager directly
+        command: [
+            "gdbus", "monitor", 
+            "--system", 
+            "--dest", "org.freedesktop.NetworkManager", 
+            "--object-path", "/org/freedesktop/NetworkManager"
+        ]
+        running: true
+
+        stdout: SplitParser {
+            onRead: (line) => {
+                // React immediately when NetworkManager fires a DBus signal event
+
+                if ((line.includes("StateChanged") || line.includes("PropertiesChanged") && (line.includes("20") || line.includes("70")))) {
+                    // Update state cleanly without overflowing DBus
+                    console.log(line)
+                    if (connected || line.includes("70")) {
+                        connected = false
+                        checkConnectionProcess.running = true
+                    }
+                }
+            }
+        }
+    }
+
+    Process
+    {
+        id: checkConnectionProcess
+        command: ["bash", "-c", "nmcli -t -f WIFI radio && iw dev | grep Interface && nmcli -g DEVICE,STATE device"]
+
+        stdout: StdioCollector {
+            id: shellCommandCollector
+        }
+
+        onExited: (code, status) => {
+            let lines = shellCommandCollector.text.trim().split("\n");
+            let interfaceName = lines[1].replace("Interface ", "").trim() + ":disconnected";
+            let disconnected = false
+            
+            for (let i = 1 ; i < lines.length ; i++)
+            {
+                if (lines[0] == "enabled" && lines[i].trim() == interfaceName )
+                {
+                    loader.sourceComponent = wifiConnectionNames
+                    disconnected = true
+                    break;
+                }
+            }
+
+            if (!disconnected) {
+                connected = true
+                loader.sourceComponent = wifiDiagnostics
+            }
+
+            parent.backgroundRect.rectHeight = loader.height
+
+            if (parent.backgroundRect.height > 0) {
+                root.height = loader.height
+            }
+        }
     }
 }
