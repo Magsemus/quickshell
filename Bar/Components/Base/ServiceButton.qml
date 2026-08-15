@@ -149,7 +149,7 @@ Item
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        hoverEnabled: hoverAble
         cursorShape: root.clickAble ? Qt.PointingHandCursor : null
 
         onEntered: {

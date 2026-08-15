@@ -4,6 +4,8 @@ import Quickshell.Io
 
 Item
 {
+    id: root
+
     width: button.width
     height: button.height
 
@@ -33,9 +35,9 @@ Item
         id: scriptProc
 
         command: ["/bin/bash", scriptPath]
-        running: true
+        running: (root.scriptPath != "") ? true : false
 
-        onRunningChanged: if(!running) running = true
+        onRunningChanged: if(!running && root.scriptPath != "") running = true
 
         stdout: SplitParser {
             onRead: (line) => {

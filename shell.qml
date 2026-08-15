@@ -2,6 +2,7 @@
 import Quickshell // for PanelWindow
 import QtQuick // for Text
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell.Wayland
 import "./Bar"
 import "./Bar/Popups"
@@ -17,7 +18,7 @@ PanelWindow
         left: true
         right: true
     }
-    
+
     implicitHeight: 500
     color: "transparent"
 

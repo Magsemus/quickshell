@@ -27,7 +27,7 @@ Item {
     property var content
 
     property string scriptPath: ""
-    property var procAction: function() {}
+    property var procAction: function(line) { console.log("SPAM!!!!!!") }
     property string textIcon: ""
     property string buttonAnimationType: "pop"
     property ServiceScriptButton scriptButton: _scriptButton

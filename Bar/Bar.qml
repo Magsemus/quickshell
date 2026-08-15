@@ -1,9 +1,12 @@
 import Quickshell // for PanelWindow
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Io
 import QtQuick // for Text
 import QtQuick.Layouts
 import Quickshell.Widgets
+import QtQuick.Effects
+import Quickshell.Bluetooth
 import "../ColorSchemes"
 import "./Components"
 import "./Components/Base"
@@ -27,12 +30,27 @@ Rectangle
     height: 35
     radius: 12
 
-    color: theme.colDarkBlue
+    gradient: Gradient {
+        orientation: Gradient.vertical
+        GradientStop { position: 1.0; color: theme.colDarkBlue } // Orange
+        GradientStop { position: 0.0; color: "#110d11"} // Yellow
+    }
 
     property PanelWindow mainWindow 
     property BarWidget middleWidget 
     property BarWidget servicePopup
     property Item serviceMouseArea
+
+    MultiEffect {
+        anchors.fill: backgroundRect
+        source: backgroundRect
+        
+        shadowEnabled: true
+        shadowColor: theme.colDarkBlue // Light pink glow matching wallpaper
+        shadowBlur: 0.1 // Blur intensity
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: 1
+    }
 
     RowLayout {
         id: leftSection
@@ -61,7 +79,7 @@ Rectangle
             NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
         }   
 
-        color: theme.colDarkerBlue
+        color: theme.colDarkBlue
 
         Text 
         {
@@ -176,6 +194,7 @@ Rectangle
 
             width: servicesLayoutRow.width + 20
             height: servicesLayoutRow.height + 2
+
             color: theme.colLightBlue
 
             Layout.alignment: Qt.AlignVCenter
@@ -217,15 +236,48 @@ Rectangle
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                ServiceButton { 
+                ServicePopupButton {
                     id: bluetooth
-                    activeIcon: "󰂯"
-                    onClickedAction: function () {
-                        console.log("GIGGITY BLUETOOTH!")
-                    }
-                    clickAble: false
+
+                    content: "BluetoothPopup"
+                    servicePopup: backgroundRect.servicePopup
+                    serviceMouseArea: backgroundRect.serviceMouseArea
+
+                    textIcon: "󰂯"
+                    buttonAnimationType: "fade"
                     anchors.verticalCenter: parent.verticalCenter
-                    Layout.rightMargin: 5
+
+                    Connections {
+                        id: bluetoothConnection
+                        target: Bluetooth.defaultAdapter
+
+                        property var bluetoothStateCheck: () => {
+                            console.log("does bluetooth defaultAdapter exist? " + Bluetooth.defaultAdapter)
+                            if (Bluetooth.defaultAdapter) {
+                                switch(Bluetooth.defaultAdapter.state) {
+                                    case 1: bluetooth.triggerIconUpdate("󰂯"); break;
+                                    case 4: bluetooth.triggerIconUpdate("󰂲"); break;
+                                }
+                            }
+                        }
+
+                        function onStateChanged() {
+                            bluetoothStateCheck()
+                        }
+                        
+                    }
+
+                    Process {
+                        command: ["bluetooth"]
+                        running: true
+
+                        stdout: SplitParser {
+                            onRead: (line) => {
+                                if (line.includes("on")) bluetooth.textIcon = "󰂯";  
+                                else if (line.includes("off")) bluetooth.textIcon = "󰂲"; 
+                            }
+                        }
+                    }
                 }
 
                 ServicePopupButton {
@@ -252,11 +304,12 @@ Rectangle
 
         Rectangle
         {
-            Layout.rightMargin: 24
+            Layout.rightMargin: rightSection.batteryConnected ? 64 : 24
             radius: 6
 
             width: layoutRow.width + 20
             height: layoutRow.height + 5
+
             color: theme.colLightBlue
             
             Behavior on width{
@@ -308,14 +361,46 @@ Rectangle
                         if (!data) return
                         return data
                     }
-                    procCommand: "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits"
+                    procCommand: rightSection.amdGraphicsCard ? "echo \"$(( $(cat /sys/class/drm/card1/device/hwmon/hwmon*/temp1_input) / 1000 ))\"" : "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits"
+                }
+                DiagnosticText { 
+                    id: battery
+                    text: rightSection.batteryConnected ? `${icon} ${value}%` : ""
+                    parseData: function(data) {
+                        if (!data) return
+
+                        if (String(data) == "Discharging" || String(data) == "Not charging") {
+                            charging = false
+                            return battery.value
+                        }
+                        if (String(data) == "Charging") {
+                            charging = true
+                            return battery.value
+                        }
+
+                        const discharginIcons = ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+                        const chargingIcons = ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"]
+
+                        let iconNumber = data
+                        let i = 0
+                        while (iconNumber >= 10 && i < chargingIcons.length) {
+                            iconNumber = iconNumber - 10
+                            i++
+                        }
+
+                        icon = charging ? chargingIcons[i] : discharginIcons[i]
+                        return data
+                    }
+                    procCommand: "cat /sys/class/power_supply/BAT0/status /sys/class/power_supply/BAT0/capacity"
+                    property string icon: "󰂎"
+                    property bool charging: false
                 }
             }
         }
 
         ServiceButton { 
             id: power 
-            activeIcon: "\u2001\u200A"
+            activeIcon: ""
             onClickedAction: function () {
                 if (middleWidget.contentLoader.source != "../../Popups/PowerPopup.qml") 
                 { 
@@ -327,10 +412,53 @@ Rectangle
                 }
             }
             isCircle: true
-            buttonRect.x: +2.5
-            width: 28
-            height: 28
+            buttonRect.x: -0.5
+            widthOffset: 10
             Layout.alignment: Qt.AlignVCenter
+        }
+
+        property bool batteryConnected: false
+            
+        Process {
+            id: batteryCheck
+            command: ["bash", "-c", "cat /sys/class/power_supply/BAT0/present 2>/dev/null || echo 'No battery'"]
+
+            running: true
+
+            // 2. Capture standard output
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    let output = text.trim()
+
+                    if (output === "1") {
+                        rightSection.batteryConnected = true
+                    } else {
+                        rightSection.batteryConnected = false
+                    }
+                }
+            }
+        }
+        
+        property bool amdGraphicsCard: false
+
+        Process {
+            id: graphicsCardTypeCheck
+            command: ["bash", "-c", "lspci | grep -E \"VGA|3D|Display\""]
+
+            running: true
+
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    let output = text.trim()
+
+                    if (output.includes("AMD")) {
+                        rightSection.amdGraphicsCard = true
+                    }
+                    else {
+                        rightSection.amdGraphicsCard = false
+                    }
+                }
+            }
         }
 
         Timer {
@@ -341,6 +469,9 @@ Rectangle
                 cpu.update()
                 mem.update()
                 gpu.update()
+                if (rightSection.batteryConnected) {
+                    battery.update()
+                }
 
                 var now = new Date()
                 clock.text = Qt.formatDateTime(now, "HH:mm")

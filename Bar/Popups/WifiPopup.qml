@@ -40,13 +40,8 @@ Item {
             width: wifiColumn.width + 50
             height: wifiColumn.height + 10
 
-            property var iB: [
-                "KiB",
-                "MiB",
-                "GiB"
-            ]
-
             property string name
+            property bool fullMAC
 
             Column {
                 id: wifiColumn
@@ -424,8 +419,8 @@ Item {
                         width: 50
                         height: 20
                         innerCircleColor: theme.colFg
-                        colorOff: theme.colDarkerBlue
-                        colorOn: theme.colLightBlue
+                        colorOff: theme.colBlack
+                        colorOn: theme.colHoverBlue
                         anchors.verticalCenter: parent.verticalCenter
                         clickAction: () => {
                             toggle = !toggle
@@ -435,6 +430,19 @@ Item {
                     }
                 }
             }
+
+            property var kConvertion: (x) => {
+                if (x > 1000) return String((x / 1000).toFixed(0)) + "k"
+                return String(x)
+            }
+
+            property int rxPacketsNumber: 0 
+            property int txPacketsNumber: 0
+            property var rxPhysicalLinkRate: 0
+            property int prevRxDrops: 0 
+            property int prevRxPackets: 0
+            property int prevTxPackets: 0
+            property int prevTxRetries: 0
 
             Process {
                 id: wifiShellCommand
@@ -480,26 +488,27 @@ Item {
                     };
 
                     let iBconvertion = (x) => {
+                        if (typeof x !== "number" || isNaN(x) || !isFinite(x) || x <= 0) return "0";
+                        
+                        const units = ["KiB", "MiB", "GiB", "TiB", "PiB"];
                         let i = -1 ;
-                        while (true)
-                        {
 
-                            if (x < Math.pow(2, (i + 2) * 10)) 
-                            {
-                                x = x / Math.pow(2, (i + 1) * 10);
-                                break;
-                            }
-
+                        while (x >= 1024 && i < units.length) {
+                            x /= 1024;
                             i++;
                         }
+
                         if (i == -1) return String(x.toFixed(2));
-                        else return x.toFixed(2) + " " + iB[i];
+                        else return x.toFixed(2) + " " + units[i];
                     }
 
                     let kConvertion = (x) => {
                         if (x > 1000) return String((x / 1000).toFixed(0)) + "k"
                         return String(x)
                     }
+
+                    const lowerSpectrum = [0, 1, 5, 10, 25, 50, 75, 100]
+                    const higherSpectrum = [100, 125, 150, 200, 250, 300, 400, 500]
 
                     // UI Updates
                     let interfaceName = stats["interface"] || "";
@@ -513,42 +522,56 @@ Item {
                     // RX / TX Speeds (Bitrates)
                     let rxBitrate = getNum(stats["rx bitrate"]); // Bitrate in MBit/s
                     let rxSpeed = (rxBitrate / 8).toFixed(1);
-                    reciever.progress = reciever.speedToProgress(rxSpeed);
+                    reciever.ticks = (rxSpeed > 100) ? higherSpectrum : lowerSpectrum
                     reciever.currentMeasurement.text = rxSpeed;
+                    reciever.progress = reciever.speedToProgress(rxSpeed);
 
                     let txBitrate = getNum(stats["tx bitrate"]);
                     let txSpeed = (txBitrate / 8).toFixed(1);
-                    transmiter.progress = transmiter.speedToProgress(txSpeed);
+                    transmiter.ticks = (txSpeed > 100) ? higherSpectrum : lowerSpectrum
                     transmiter.currentMeasurement.text = txSpeed;
-
-                    // Expected / Theoretical Speed
-                    let expected = (getNum(stats["expected throughput"]) / 8).toFixed(2);
-                    expectedSpeed.text = `${expected} MB/s`;
+                    transmiter.progress = transmiter.speedToProgress(txSpeed);
 
                     // RX Packages & Bytes
                     let rxPackets = getNum(stats["rx packets"]);
                     let rxBytes = getNum(stats["rx bytes"]);
                     rxPackageMeasurement.text = `${kConvertion(rxPackets)} (${iBconvertion(rxBytes)})`;
 
-                    let rxDrop = getNum(stats["rx drop misc"]);
-                    let rxDropPct = rxPackets > 0 ? ((rxDrop / (rxPackets)) * 100).toFixed(2) : "0.00";
-                    rxPackageDroppedMeasurement.text = `${rxDrop} (${rxDropPct}%)`;
-
                     // TX Packages & Retries
                     let txPackets = getNum(stats["tx packets"]);
                     let txBytes = getNum(stats["tx bytes"]);
                     txPackageMeasurement.text = `${kConvertion(txPackets)} (${iBconvertion(txBytes)})`;
 
-                    let txRetry = getNum(stats["tx retries"]); // or stats["tx retries"]
-                    let txRetryPct = txPackets > 0 ? ((txRetry / txPackets) * 100).toFixed(2) : "0.00";
-                    txPackageRertyMeasurement.text = `${kConvertion(txRetry)} (${txRetryPct}%)`;
-
-                    txPackageFailure.text = getNum(stats["tx failed"]).toString();
-
                     // Beacons
                     let beaconsRx = getNum(stats["beacon rx"]);
                     let beaconsLoss = getNum(stats["beacon loss"]);
                     beacons.text = `󰑩 ${beaconsRx}   ${beaconsLoss}`;
+
+                    let hasSoftMacStats = "expected throughput" in stats;
+
+                    if (hasSoftMacStats) {
+                        // Expected / Theoretical Speed
+                        let expected = (getNum(stats["expected throughput"]) / 8).toFixed(2);
+                        expectedSpeed.text = `${expected} MB/s`;
+
+                        // RX Drops
+                        let rxDrop = getNum(stats["rx drop misc"]);
+                        let rxDropPct = rxPackets > 0 ? ((rxDrop / rxPackets) * 100).toFixed(2) : "0.00";
+                        rxPackageDroppedMeasurement.text = `${rxDrop} (${rxDropPct}%)`;
+
+                        // TX Retries
+                        let txRetry = getNum(stats["tx retries"]);
+                        let txRetryPct = txPackets > 0 ? ((txRetry / txPackets) * 100).toFixed(2) : "0.00";
+                        txPackageRertyMeasurement.text = `${kConvertion(txRetry)} (${txRetryPct}%)`;
+
+                        // TX Failures
+                        txPackageFailure.text = getNum(stats["tx failed"]).toString();
+                    }
+                    else {  
+                        txPacketsNumber = txPackets
+                        rxPacketsNumber = rxPackets
+                        rxPhysicalLinkRate = rxSpeed
+                    }
                 }
             }
 
@@ -579,6 +602,56 @@ Item {
                 }
             }
 
+
+            Process {
+                id: fullMACDataRetrieval
+                command: ["bash", "-c", "nc -U /run/ath11k-stats/stats.sock"]
+
+                stdout: StdioCollector {
+                    id: fullMACCollector
+                }
+
+                onExited: (code, status) => {
+                    var output = JSON.parse(fullMACCollector.text.trim().split("\n"))
+
+                    let rxDrop = output["rx_dropped"];
+                    let rxDropPct = rxPacketsNumber > 0 ? ((rxDrop / rxPacketsNumber) * 100).toFixed(2) : "0.00";
+                    rxPackageDroppedMeasurement.text = `${rxDrop} (${rxDropPct}%)`;
+
+                    let txRetry = output["tx_retries"]
+                    let txRetryPct = txPacketsNumber > 0 ? ((txRetry / txPacketsNumber) * 100).toFixed(2) : "0.00";
+                    txPackageRertyMeasurement.text = `${kConvertion(txRetry)} (${txRetryPct}%)`;
+
+                    txPackageFailure.text = output["tx_failed"].toString();
+                    
+                    let MAC_EFFICIENCY = 0.75;
+
+                    let deltaRxPackets = Math.max(0, rxPacketsNumber - prevRxPackets);
+                    let deltaRxDrops = Math.max(0, rxDrop - prevRxDrops);
+                    let deltaTxPackets = Math.max(0, txPacketsNumber - prevTxPackets);
+                    let deltaTxRetries = Math.max(0, txRetry - prevTxRetries);
+
+                    prevRxPackets = rxPacketsNumber;
+                    prevRxDrops = rxDrop;
+                    prevTxPackets = txPacketsNumber;
+                    prevTxRetries = txRetry;
+                    
+                    let totalRx = deltaRxPackets + deltaRxDrops;
+                    let totalTx = deltaTxPackets + deltaTxRetries;
+
+                    let dropRate = (totalRx > 0) ? deltaRxDrops / totalRx : 0;
+                    let retryRate = (totalTx > 0) ? deltaTxRetries / totalTx : 0;
+
+                    let dropPanelty = 1 - dropRate
+                    let retryPanelty = 1 / (1 + retryRate)
+
+                    let effeciency =  MAC_EFFICIENCY * dropPanelty * retryPanelty
+                    let expectedByterate = (rxPhysicalLinkRate * effeciency).toFixed(1)
+
+                    expectedSpeed.text = `${expectedByterate} MB/s`
+                }
+            }
+
             Process{
                 id: interfaceName
                 command: ["bash", "-c", "nmcli"]
@@ -595,6 +668,29 @@ Item {
                     linkQualityCommand.running = true;
                     signalFrequencyCommand.running = true;
                     checkStatusProc.running = true;
+                    if (fullMAC) fullMACDataRetrieval.running = true
+                }
+            }
+
+            Process{
+                id: l2ArchitectureCheck
+                command: ["bash", "-c", "for dev in $(ip -o link show | awk -F': ' '$2 ~ /^w/ {print $2}'); do drv=$(basename $(readlink /sys/class/net/$dev/device/driver 2>/dev/null)); deps=$(modinfo $drv 2>/dev/null | grep ^depends); if echo \"$deps\" | grep -q \"mac80211\"; then echo \"SoftMAC\"; else echo \"FullMAC\"; fi; done"]
+
+                stdout: StdioCollector {
+                    id: l2Collector
+                }
+
+                onExited: (code, status) => {
+                    var output = stdoutCollector.text.trim().split("\n");
+
+                    if (output.includes("Soft")) {
+                        fullMAC = false
+                    }
+                    else {
+                        fullMAC = true
+                    }
+
+                    interfaceName.running = true
                 }
             }
 
@@ -647,11 +743,13 @@ Item {
                 onTriggered: {
                     wifiShellCommand.running = true
                     linkQualityCommand.running = true
+                    if (fullMAC) fullMACDataRetrieval.running = true
+
                 }
             }
 
             Component.onCompleted: {
-                interfaceName.running = true
+                l2ArchitectureCheck.running = true
             }
         }
     }
@@ -663,18 +761,26 @@ Item {
         {
             id: wifiConnectionNamesItem
             width: 350
-            height: (root.heightOfBackgroundRect > 0) ? root.height : wifiConnectionNamesColumn.height
+            height: (root.heightOfBackgroundRect > 0) ? root.height : wifiConnectionNamesColumn.height + 10
 
             Column {
                 id: wifiConnectionNamesColumn
 
                 width: wifiConnectionNamesItem.width
-                spacing: 2
-
-                StyledText {
-                    id: title
-                    text: "Connections" 
+                spacing: 10
+                
+                Rectangle {
+                    implicitWidth: title.width + 15
+                    implicitHeight: title.height + 2
+                    color: theme.colLightBlue
+                    radius: 12
                     anchors.horizontalCenter: parent.horizontalCenter
+
+                    StyledText {
+                        id: title
+                        text: "Wi-Fi networks" 
+                        anchors.centerIn: parent
+                    }
                 }
 
                 ScrollView {
@@ -692,16 +798,47 @@ Item {
                     Process {
                         id: getNamesOfConnections
 
-                        command: ["nmcli", "-t", "-f", "ssid", "dev", "wifi"]
+                        command: ["bash", "-c", "nmcli -t -f ssid,signal dev wifi"]
 
                         running: true
+                        stdout: StdioCollector {
+                            id: stdoutCollector
+                        }
 
-                        stdout: SplitParser {
-                            onRead: (line) => {
-                                let output = line.trim() // Corrected variable name
-                                if (output !== "") {     // Corrected operator
-                                    scrollView.listOfNames.push(String(output))
-                                    console.log(output)
+                        onExited: (code, status) => {
+                            let lines = stdoutCollector.text.trim().split("\n");
+                            let arrayOfNames = []
+
+                            for (let i = 0 ; i < lines.length ; i++) {
+                                let name = lines[i].match(/^[^:]+/)
+                                if (name !== "" && name !== null) {     // Corrected operator
+                                    let strength = Number(lines[i].match(/:(.*)/)[1])
+
+                                    let signalIcon = "󰤮"
+                                    if (strength > 80) signalIcon = "󰤨";      
+                                    else if (strength > 60) signalIcon = "󰤥"; 
+                                    else if (strength > 40) signalIcon = "󰤢"; 
+                                    else if (strength > 20) signalIcon = "󰤟";
+                                    else signalIcon = "󰤯"
+
+                                    let displayName = `${signalIcon} ${name}`
+
+                                    if (!scrollView.listOfNames.includes(displayName)) {
+                                        scrollView.listOfNames.push(displayName)
+                                    }
+                                    else {
+                                        arrayOfNames.push(displayName)
+                                    }
+                                }
+                            }
+                            
+                            // checks whether a network in the listOfNames can't be seen and removes it from listOfNames
+                            if (arrayOfNames.length != scrollView.listOfNames.length) {
+                                for (let i = 0 ; i < scrollView.listOfNames.length ; i++) {
+                                    let name = scrollView.listOfNames[i]
+                                    if (!arrayOfNames.includes(name)) {
+                                        scrollView.listOfNames.pop(name);
+                                    }
                                 }
                             }
                         }
@@ -727,7 +864,7 @@ Item {
                                 Process {
                                     id: connectToNetwork
 
-                                    command: ["bash", "-c", `nmcli device wifi connect "${activeIcon}"`]
+                                    command: ["bash", "-c", `nmcli device wifi connect "${activeIcon.split(" ")[1]}"`]
 
                                     stdout: StdioCollector {
                                         id: stdoutCollector
@@ -753,9 +890,21 @@ Item {
 
                         onHoveredChanged: {
                             if (hovered) {
-                                root.height = wifiConnectionNamesColumn.height;
+                                root.height = wifiConnectionNamesColumn.height + 10;
                             }
                         }
+                    }
+                }
+
+                ServiceButton {
+                    id: rescanButton
+
+                    activeIcon: " Rescan networks"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    widthOffset: 15
+
+                    onClickedAction: () => {
+                        getNamesOfConnections.running = true
                     }
                 }
             }
@@ -875,6 +1024,7 @@ Item {
                         backgroundColor: theme.colLightBlue
                         widthOffset: 20
                         onClickedAction: () => {
+                            parent.forceActiveFocus();
                             connectToNetworkWithPassword.running = true;
                         }
                     }

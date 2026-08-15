@@ -62,27 +62,11 @@ Item {
     }
     
     property var numberCircles: [
-        "󰲡",
-        "󰲣",
-        "󰲥",
-        "󰲧",
-        "󰲩",
-        "󰲫",
-        "󰲭",
-        "󰲯",
-        "󰲱"
+        "󰲡", "󰲣", "󰲥", "󰲧", "󰲩", "󰲫", "󰲭", "󰲯", "󰲱"
     ]
 
     property var filledNumberCircles: [
-        "󰲠",
-        "󰲢",
-        "󰲤",
-        "󰲦",
-        "󰲨",
-        "󰲪",
-        "󰲬",
-        "󰲮",
-        "󰲰"
+        "󰲠", "󰲢", "󰲤", "󰲦", "󰲨", "󰲪", "󰲬", "󰲮", "󰲰"
     ]
 
     Rectangle {
@@ -90,6 +74,7 @@ Item {
         width: workspaceList.contentWidth + workspaceList.leftMargin + workspaceList.rightMargin      
         height: workspaceList.implicitHeight + 2
         radius: 9
+
         color: theme.colLightBlue
 
         Behavior on width {
@@ -124,7 +109,7 @@ Item {
                 height: parent.height - 3
                 anchors.verticalCenter: parent.verticalCenter
 
-                property var ws: workspaceObject 
+                property var ws: workspaceObject ?? null
                 property bool isActive: Hyprland.focusedWorkspace?.id === wsId
 
                 // 2. The Isolated Highlight Layer
@@ -134,8 +119,8 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
                     radius: 9
-                    color: theme.colClickBlue
-
+                    //color: theme.colClickBlue
+                    color: theme.colBlack
                     // Control the fading separately
                     opacity: delegateRoot.isActive ? 1.0 : 0.0
                     Behavior on opacity {
@@ -163,11 +148,10 @@ Item {
                         color: delegateRoot.isActive ? theme.colCyan : theme.colBlue
                         font { pixelSize: 16; bold: true }
                         renderType: Text.NativeRendering
-                        anchors.verticalCenter: parent.verticalCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        height: 17.5
                         
+                        horizontalAlignment: Text.AlignHCenter
+                        y: -2.75
+                        height: 17.5
 
                         Behavior on text {
                             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200000; easing.type: Easing.OutQuad }
@@ -179,10 +163,10 @@ Item {
                     }
 
                     ListView {
-                        model: ws.toplevels
-                        height: parent.height
+                        model: ws.toplevels ?? []
+                        height: parent.height ? parent.height : 0
                         implicitWidth: contentWidth
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter: parent ? parent.verticalCenter : undefined
                         orientation: ListView.Horizontal
                         interactive: false
                         spacing: 6

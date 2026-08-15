@@ -1,6 +1,7 @@
 import Quickshell 
 import QtQuick 
 import QtQuick.Shapes
+import QtQuick.Effects
 
 Rectangle 
 {
@@ -65,7 +66,13 @@ Rectangle
 
         ShapePath {
             strokeWidth: 0
-            fillColor: theme.colDarkBlue
+
+            fillGradient: LinearGradient {
+                x1: shape.width; y1: 0
+                x2: shape.width; y2: shape.height
+                GradientStop { position: 1.0; color: "#110d1a" } // Orange
+                GradientStop { position: 0.0; color: theme.colDarkBlue } // Yellow
+            }
 
             // Start at x = -1, which maps to top-left (0, 0)
             startX: 0
@@ -116,6 +123,17 @@ Rectangle
             }
             
         }
+    }
+
+    MultiEffect {
+        anchors.fill: shape
+        source: shape
+        
+        shadowEnabled: true
+        shadowColor: theme.colDarkBlue // Light pink glow matching wallpaper
+        shadowBlur: 0.1 // Blur intensity
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: 1
     }
 
     Loader {

@@ -16,11 +16,11 @@ Item {
     property real progress: 0.8
 
     // Gauge geometry parameters
-    readonly property real minAngle: 135   // Bottom-left start (0 Mbps)
-    readonly property real maxSweep: 270   // Total angular span of the gauge
-    readonly property real arcRadius: width/2.5 // Center-line radius of the arc
-    readonly property real arcThickness: 5// Width of the blue bar
-    readonly property var ticks: [0, 1, 5, 10, 25, 50, 75, 100];
+    property real minAngle: 135   // Bottom-left start (0 Mbps)
+    property real maxSweep: 270   // Total angular span of the gauge
+    property real arcRadius: width/2.5 // Center-line radius of the arc
+    property real arcThickness: 5// Width of the blue bar
+    property var ticks: [0, 1, 5, 10, 25, 50, 75, 100];
 
     property Text currentMeasurement: _currentMeasurement
 
@@ -160,7 +160,7 @@ Item {
         y: parent.height - height
         
     }
-
+    
     Repeater {
         model: gauge.ticks.length
 
@@ -185,7 +185,7 @@ Item {
         if (speedMB <= 0) return 0.0;
 
         // Clamp upper bound (100+ MB/s -> 1.0)
-        if (speedMB >= 100) return 1.0;
+        if (speedMB >= ticks[ticks.length -1]) return 1.0;
 
         // Find which segment speedMB falls into
         for (var i = 0; i < ticks.length - 1; i++) {
@@ -193,6 +193,7 @@ Item {
             var upper = ticks[i + 1];
 
             if (speedMB >= lower && speedMB <= upper) {
+                console.log(upper)
                 // How far between lower and upper ticks are we? (0.0 to 1.0 within segment)
                 var segmentProgress = (speedMB - lower) / (upper - lower);
 

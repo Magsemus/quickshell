@@ -9,41 +9,25 @@ Item
 {
     id: powerProfilesPopup
 
-    width: column.width + 20
+    width: column.width + 30
     height: column.height + 20
 
     anchors.centerIn: parent
     
     Colorscheme { id: theme }
 
-    function switchToPerformance() {
-        profileText.text = "Power profile: Performance"
+    function switchProfile(profile) {
+        profileText.text = `Power profile: ${profile}`
 
-        performance.textColor = theme.colCyan
-        balanced.textColor = theme.colFg
-        powerSaver.textColor = theme.colFg
+        performance.textColor = (profile == "performance") ? theme.colCyan : theme.colFg
+        balanced.textColor = (profile == "balanced") ? theme.colCyan : theme.colFg
+        powerSaver.textColor = (profile == "power-saver") ? theme.colCyan : theme.colFg
 
-        circle.x = performance.x + 7
-    }
-
-    function switchToBalanced() {
-        profileText.text = "Power profile: Balanced"
-
-        performance.textColor = theme.colFg
-        balanced.textColor = theme.colCyan
-        powerSaver.textColor = theme.colFg
-
-        circle.x = balanced.x + 6.5
-    }
-
-    function switchToPowerSaver() {
-        profileText.text = "Power profile: power-saver"
-
-        performance.textColor = theme.colFg
-        balanced.textColor = theme.colFg
-        powerSaver.textColor = theme.colCyan
-
-        circle.x = powerSaver.x + 7
+        switch(profile) {
+            case "performance": circle.x = performance.x + 7; break
+            case "balanced": circle.x = balanced.x + 6.5; break
+            case "power-saver": circle.x = powerSaver.x + 7; break
+        }
     }
 
     Column
@@ -51,18 +35,26 @@ Item
         id: column
         anchors.centerIn: parent
         spacing: 10
-        
-        Text
-        {
-            id: batteryText
-            color: theme.colFg
-            width: 156
-            font { family: theme.fontFamily; pixelSize: 10; bold: true }
-            renderType: Text.NativeRendering
-            anchors.horizontalCenter: parent.horizontalCenter
 
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+        Rectangle
+        {
+            id: batteryRect
+            implicitWidth: batteryText.width + 30
+            implicitHeight: batteryText.height + 10
+            color: theme.colLightBlue
+            radius: 12
+
+            Text
+            {
+                id: batteryText
+                color: theme.colFg
+                font { family: theme.fontFamily; pixelSize: 10; bold: true }
+                renderType: Text.NativeRendering
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                verticalAlignment: Text.AlignVCenter
+            }
         }
 
         Text
@@ -102,7 +94,7 @@ Item
 
                 ShapePath {
                     strokeWidth: 0
-                    fillColor: theme.colDarkBlue
+                    fillColor: theme.colBlack
 
                     startX: 0
                     startY: 0
@@ -130,7 +122,7 @@ Item
                     activeIcon: ""
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "performance"]);
-                        powerProfilesPopup.switchToPerformance();
+                        powerProfilesPopup.switchProfile("performance");
                         console.log(performance.height + " : " + performance.width)
                     }
                     hoverAble: true
@@ -145,7 +137,7 @@ Item
                     activeIcon: ""
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "balanced"]);
-                        powerProfilesPopup.switchToBalanced();
+                        powerProfilesPopup.switchProfile("balanced");
                         console.log(balanced.height + " : " + balanced.width)
                     }
                     hoverAble: true
@@ -161,7 +153,7 @@ Item
                     activeIcon: "󰌪"
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "power-saver"]);
-                        powerProfilesPopup.switchToPowerSaver();
+                        powerProfilesPopup.switchProfile("power-saver");
                         console.log(powerSaver.buttonRadius)
                     }
                     hoverAble: true
@@ -187,13 +179,13 @@ Item
             onRead: (line) => {
                 switch (line) {
                     case "":
-                        powerProfilesPopup.switchToPerformance();
+                        powerProfilesPopup.switchProfile("performance");
                         break;
                     case "":
-                        powerProfilesPopup.switchToBalanced();
+                        powerProfilesPopup.switchProfile("balanced");
                         break;
                     case "󰌪":
-                        powerProfilesPopup.switchToPowerSaver();
+                        powerProfilesPopup.switchProfile("power-saver");
                         break;
                     default: 
                         profileText.text = "Power profile: unknown";
@@ -214,11 +206,54 @@ Item
                 let output = text.trim()
 
                 if (output === "1") {
-                    console.log("Battery connected!")
+                    upowerCommand.running = true;
+                    upowerTimer.running = true;
                 } else {
-                    batteryText.text = "No battery connected"
+                    batteryText.text = "No battery connected";
                 }
             }
+        }
+    }
+
+    Process {
+        id: upowerCommand
+        command: ["bash", "-c", "upower -i /org/freedesktop/UPower/devices/battery_BAT0"]
+
+        stdout: StdioCollector {
+            id: stdoutCollector
+        }
+
+        onExited: (code, status) => {
+            let lines = stdoutCollector.text.trim().split("\n");
+            if (lines.length < 2) return
+            
+            let stats = {};
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+
+                // Map line headers (e.g., "rx bytes: 123456") to stats key-value pairs
+                let colonIdx = line.indexOf(":");
+                if (colonIdx !== -1) {
+                    let key = line.substring(0, colonIdx).trim();
+                    let val = line.substring(colonIdx + 1).trim();
+                    stats[key] = val;
+                }
+            }
+
+            let hour = stats["time to empty"].match(/-?\d+(?:\.\d+)?/g)
+            let timeLeft = `${hour[0]} h ${(Number("0." + hour[1]) * 60).toFixed(0)} min`
+
+            batteryText.text = `energy-rate         ${String(stats["energy-rate"])}\nempty in            ${String(timeLeft)}\ncharge-cycles       ${String(stats["charge-cycles"])}\nbattery efficiency  ${stats["capacity"]}`;
+        }
+    }
+
+    Timer {
+        id: upowerTimer
+        interval: 2000
+        running: false
+        repeat: true
+        onTriggered: {
+            upowerCommand.running = true
         }
     }
 
