@@ -123,7 +123,6 @@ Item
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "performance"]);
                         powerProfilesPopup.switchProfile("performance");
-                        console.log(performance.height + " : " + performance.width)
                     }
                     hoverAble: true
                     isCircle: true
@@ -138,7 +137,6 @@ Item
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "balanced"]);
                         powerProfilesPopup.switchProfile("balanced");
-                        console.log(balanced.height + " : " + balanced.width)
                     }
                     hoverAble: true
                     isCircle: true
@@ -154,7 +152,6 @@ Item
                     onClickedAction: function () {
                         Quickshell.execDetached(["powerprofilesctl", "set", "power-saver"]);
                         powerProfilesPopup.switchProfile("power-saver");
-                        console.log(powerSaver.buttonRadius)
                     }
                     hoverAble: true
                     isCircle: true

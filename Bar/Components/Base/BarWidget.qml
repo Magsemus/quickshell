@@ -7,7 +7,7 @@ Rectangle
 {
     id: popupRect
 
-    height: _contentLoader.item ? _contentLoader.item.height : 0
+    height: rectHeight ? rectHeight : 0
     //color: theme.colDarkBlue // Off-white/cream background matching the image
     color: "transparent"
     clip: true
@@ -142,8 +142,7 @@ Rectangle
         property Rectangle backgroundRect: popupRect
 
         onHeightChanged: {
-            if (height != 0)
-            {
+            if (popupRect.height != 0) {
                 popupRect.width = item.width + 20
                 popupRect.rectHeight = item.height
                 popupRect.rectWidth = item.width + 20 
@@ -156,6 +155,17 @@ Rectangle
         }
 
         anchors.centerIn: parent
+
+        onItemChanged: {
+            if (item != null) popupRect.rectHeight = item.height
+            else popupRect.rectHeight = 0
+        }
+    }
+    
+    onHeightChanged: {
+        if (height == 0) {
+            _contentLoader.active = false
+        }
     }
 
     property Loader contentLoader: _contentLoader

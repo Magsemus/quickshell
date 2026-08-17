@@ -193,7 +193,6 @@ Item {
             var upper = ticks[i + 1];
 
             if (speedMB >= lower && speedMB <= upper) {
-                console.log(upper)
                 // How far between lower and upper ticks are we? (0.0 to 1.0 within segment)
                 var segmentProgress = (speedMB - lower) / (upper - lower);
 

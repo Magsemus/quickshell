@@ -410,7 +410,7 @@ Item {
                         onClickedAction: () => {
                             Quickshell.execDetached(["nmcli", "device", "disconnect", wifiDiagnosticsItem.name])
                             loader.sourceComponent = wifiConnectionNames
-                            console.log("TEST!!!! " + root.width)
+                            loader.sourceComponent.item.height = root.height
                         }
                     }
 
@@ -743,8 +743,7 @@ Item {
                 onTriggered: {
                     wifiShellCommand.running = true
                     linkQualityCommand.running = true
-                    if (fullMAC) fullMACDataRetrieval.running = true
-
+                    if (fullMAC) fullMACDataRetrieval.running = true    
                 }
             }
 
@@ -761,7 +760,7 @@ Item {
         {
             id: wifiConnectionNamesItem
             width: 350
-            height: (root.heightOfBackgroundRect > 0) ? root.height : wifiConnectionNamesColumn.height + 10
+            height: wifiConnectionNamesColumn.height + 10
 
             Column {
                 id: wifiConnectionNamesColumn
@@ -786,8 +785,8 @@ Item {
                 ScrollView {
                     id: scrollView
 
-                    width: wifiConnectionNamesColumn.width
-                    height: 250
+                    implicitWidth: wifiConnectionNamesColumn.width
+                    implicitHeight: 250
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -800,7 +799,8 @@ Item {
 
                         command: ["bash", "-c", "nmcli -t -f ssid,signal dev wifi"]
 
-                        running: true
+                        property bool beginning: true
+
                         stdout: StdioCollector {
                             id: stdoutCollector
                         }
@@ -833,7 +833,8 @@ Item {
                             }
                             
                             // checks whether a network in the listOfNames can't be seen and removes it from listOfNames
-                            if (arrayOfNames.length != scrollView.listOfNames.length) {
+                            if (!beginning) {
+                                console.log(arrayOfNames.length + " "  + scrollView.listOfNames.length);
                                 for (let i = 0 ; i < scrollView.listOfNames.length ; i++) {
                                     let name = scrollView.listOfNames[i]
                                     if (!arrayOfNames.includes(name)) {
@@ -841,6 +842,8 @@ Item {
                                     }
                                 }
                             }
+
+                            if (beginning) beginning = !beginning;
                         }
                     }
 
@@ -909,6 +912,10 @@ Item {
                 }
             }
 
+            Component.onCompleted: {
+                getNamesOfConnections.running = true
+            }
+
             Behavior on height{
                 NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
             }
@@ -945,7 +952,6 @@ Item {
                 }
 
                 onExited: (code, status) => {
-                    console.log("TRYING TO CONNECT")
                     if (!stdoutCollector.text.includes("successfully activated")) {
                         textInput.text = ""
 
@@ -1069,7 +1075,6 @@ Item {
 
                 if ((line.includes("StateChanged") || line.includes("PropertiesChanged") && (line.includes("20") || line.includes("70")))) {
                     // Update state cleanly without overflowing DBus
-                    console.log(line)
                     if (connected || line.includes("70")) {
                         connected = false
                         checkConnectionProcess.running = true
@@ -1083,6 +1088,8 @@ Item {
     {
         id: checkConnectionProcess
         command: ["bash", "-c", "nmcli -t -f WIFI radio && iw dev | grep Interface && nmcli -g DEVICE,STATE device"]
+        
+        running: true
 
         stdout: StdioCollector {
             id: shellCommandCollector
@@ -1092,7 +1099,9 @@ Item {
             let lines = shellCommandCollector.text.trim().split("\n");
             let interfaceName = lines[1].replace("Interface ", "").trim() + ":disconnected";
             let disconnected = false
-            
+
+            console.log(root.height)
+
             for (let i = 1 ; i < lines.length ; i++)
             {
                 if (lines[0] == "enabled" && lines[i].trim() == interfaceName )

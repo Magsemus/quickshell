@@ -252,7 +252,6 @@ Rectangle
                         target: Bluetooth.defaultAdapter
 
                         property var bluetoothStateCheck: () => {
-                            console.log("does bluetooth defaultAdapter exist? " + Bluetooth.defaultAdapter)
                             if (Bluetooth.defaultAdapter) {
                                 switch(Bluetooth.defaultAdapter.state) {
                                     case 1: bluetooth.triggerIconUpdate("󰂯"); break;
@@ -404,6 +403,7 @@ Rectangle
             onClickedAction: function () {
                 if (middleWidget.contentLoader.source != "../../Popups/PowerPopup.qml") 
                 { 
+                    middleWidget.contentLoader.active = true
                     middleWidget.contentLoader.source = "../../Popups/PowerPopup.qml"
                 }
                 else 

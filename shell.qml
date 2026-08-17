@@ -109,10 +109,8 @@ PanelWindow
     property bool isMenuActive: hoverHandler.hovered || panelHover.hovered
 
     onIsMenuActiveChanged: {
-        console.log(serviceContainer.serviceButtonHover + " and " + panelHover.hovered)
         if (!isMenuActive && !serviceContainer.serviceButtonHover){
             // Shrink the menu
-            console.log("giggity");
             serviceContainer.height = 0;
             serviceContainerMouseArea.height = 0;
         }

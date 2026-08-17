@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import QtQuick.Layouts
 import Quickshell.Bluetooth
+import QtQuick.Controls
 import "../../ColorSchemes"
 import "./Components"
 
@@ -141,6 +142,98 @@ Item {
                     Component.onCompleted: {
                         bluetoothStateCheck()
                     }
+                }
+            }
+        }
+
+        Text {
+            id: deviceAmountText
+            
+            text: `${Bluetooth.defaultAdapter ? validDeviceInt : 0} devices found`
+            color: theme.colFg
+            font { family: theme.fontFamily; pixelSize: 14; bold: true }
+            renderType: Text.NativeRendering
+            
+            Layout.topMargin: 10
+            Layout.leftMargin: 5
+
+            readonly property var deviceList: Bluetooth.defaultAdapter.devices.values
+            property int validDeviceInt: 0
+            
+            property var checkDeviceList: () => {
+                validDeviceInt = 0;
+                for (let i = 0 ; i < deviceList.length ; i++) {
+                    let device = deviceList[i];
+                    if (device.name.replace(/[:-]/g, "") != device.address.replace(/[:-]/g, "")) validDeviceInt++;
+                }
+            }
+
+            onDeviceListChanged: {
+                checkDeviceList();
+            }
+
+            Component.onCompleted: {
+                checkDeviceList();
+            }
+        }
+
+        ScrollView {
+            id: scrollView
+
+            implicitWidth: 300
+            implicitHeight: (scrollColumn.height < 200) ? scrollColumn.height : 200
+            Layout.leftMargin: 5
+
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+            clip: true
+            
+
+            ColumnLayout {
+                id: scrollColumn
+                spacing: 8
+
+                // 2. Start discovering when loaded so nearby devices show up
+
+                Repeater {
+                    model: Bluetooth.defaultAdapter.devices.values
+
+
+                    delegate: RowLayout {
+
+                        required property var modelData
+                        visible: modelData.name.replace(/[:-]/g, "") != modelData.address.replace(/[:-]/g, "") 
+                        spacing: 4
+
+                        function getGlyphIcon(iconName) {
+                            if (!iconName) return "󰂯"; // Default Bluetooth symbol
+
+                            if (iconName.includes("headset") || iconName.includes("headphones")) return "󰋋";
+                            if (iconName.includes("speaker") || iconName.includes("audio")) return "󰓃";
+                            if (iconName.includes("tv") || iconName.includes("display")) return "󰔁";
+                            if (iconName.includes("phone")) return "󰄜";
+                            if (iconName.includes("keyboard") || iconName.includes("mouse") || iconName.includes("input")) return "󰍽";
+
+                            return "󰂯";
+                        }
+
+                        Text {
+                            text: getGlyphIcon(modelData.icon)
+                            color: theme.colFg
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 16
+                        }
+
+                        Text {
+                            text: modelData.name
+                            color: theme.colFg
+                        }
+                    }   
+                }
+            }
+
+            Component.onCompleted: {
+                if (Bluetooth.defaultAdapter) {
+                    Bluetooth.defaultAdapter.discovering = true
                 }
             }
         }

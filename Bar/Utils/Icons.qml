@@ -21,7 +21,6 @@ Scope
         {
             if (lowerId.includes(iconMap[i]) || lowerIcon.includes(iconMap[i]))
             {
-                //console.log(iconMap[i]);
                 return getAppIcon(iconMap[i]);
             }
         }

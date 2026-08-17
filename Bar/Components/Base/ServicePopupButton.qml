@@ -27,7 +27,7 @@ Item {
     property var content
 
     property string scriptPath: ""
-    property var procAction: function(line) { console.log("SPAM!!!!!!") }
+    property var procAction: function(line) {}
     property string textIcon: ""
     property string buttonAnimationType: "pop"
     property ServiceScriptButton scriptButton: _scriptButton
@@ -42,9 +42,9 @@ Item {
             servicePopup.serviceButtonHover = true
             let Y = getHeightOffset(this);
             serviceMouseArea.yOffset = servicePopup.y - Y
-            console.log(_scriptButton.serviceButton.height)
             if (servicePopup.contentLoader.source != "../../Popups/" + content + ".qml") 
             { 
+                servicePopup.contentLoader.active = true
                 servicePopup.contentLoader.source = "../../Popups/" + content + ".qml"
                 servicePopup.module = this
 
@@ -54,7 +54,7 @@ Item {
             }
             else
             {
-                console.log("testing: " + servicePopup.rectHeight)
+                servicePopup.contentLoader.active = true
                 servicePopup.height = servicePopup.rectHeight;
                 serviceMouseArea.height = servicePopup.rectHeight + serviceMouseArea.yOffset;
                 serviceMouseArea.hoveringHandler.enabled = true
@@ -64,7 +64,6 @@ Item {
             servicePopup.serviceButtonHover = false
             if (servicePopup.height > 0 && !servicePopup.isBothHovered)
             {
-                console.log(servicePopup.height + " hahah")
                 servicePopup.height = 0;
                 serviceMouseArea.height = 0;
             }
