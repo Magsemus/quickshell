@@ -143,64 +143,75 @@ Item {
             }
         }
 
-        component DeviceItem: QtObject {
-            property string name: ""
-            property string icon: ""
-            property var device: null
-            property bool isRemoving: false
-            property bool justCreated: true
+        ListModel {
+            id: validDevicesList
         }
 
-        property Component deviceItemComponent: DeviceItem {}
-
         readonly property var deviceList: Bluetooth.defaultAdapter.devices.values
-        property list<var> validDevicesList
 
         property var checkDeviceList: () => {
-            for (let i = 0 ; i < deviceList.length ; i++) {
+            // 1. Add new valid devices
+            for (let i = 0; i < deviceList.length; i++) {
                 let rawDev = deviceList[i];
                 if (!rawDev) continue;
 
                 let cleanName = rawDev.name.replace(/[:-]/g, "");
                 let cleanAddr = rawDev.address.replace(/[:-]/g, "");
 
+
                 if (cleanName !== cleanAddr) {
-                    // Check if device already exists in validDevicesList
-                    let existing = validDevicesList.find(item => item.device === rawDev);
-                    if (!existing) {
-                        // Attach custom state flags
-                        validDevicesList.push(deviceItemComponent.createObject(null, {
+                    // Check existence using ListModel.get()
+                    let exists = false;
+                    for (let j = 0; j < validDevicesList.count; j++) {
+                        if (validDevicesList.get(j).device === rawDev) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists) {
+                        // ListModel.append triggers native ListView 'add' transitions
+                        validDevicesList.append({
                             name: rawDev.name,
                             icon: rawDev.icon,
                             device: rawDev,
                             isRemoving: false,
-                            justCreated: true
-                        }));
+                        });
+                        console.log(validDevicesList.count)
                     }
                 }
             }
-            
-            for (let i = 0; i < validDevicesList.length; i++) {
-                let item = validDevicesList[i];
+
+            // 2. Mark removed devices
+            for (let i = 0; i < validDevicesList.count; i++) {
+                let item = validDevicesList.get(i);
                 if (!deviceList.includes(item.device) && !item.isRemoving) {
-                    item.isRemoving = true; // Trigger animation in delegate
+                    // Use setProperty to update roles inside a ListModel
+                    validDevicesList.setProperty(i, "isRemoving", true);
                 }
-            }        
+            }
         }
 
         onDeviceListChanged: {
             checkDeviceList();
         }
 
-        function removeDevice(targetItem) {
-            // Filters out this exact item and reassigns the array to notify QML
-            validDevicesList = validDevicesList.filter(item => item !== targetItem)
+        function removeDevice(targetDevice) {
+            // Loop backwards to remove safely by index
+            for (let i = validDevicesList.count - 1; i >= 0; i--) {
+                let item = validDevicesList.get(i);
+                if (item.device === targetDevice || item === targetDevice || item.isRemoving === true) {
+                    // ListModel.remove triggers native ListView 'remove' transitions
+                    validDevicesList.remove(i);
+                    break;
+                }
+            }
         }
 
         Text {
             id: deviceAmountText
             
-            text: `${Bluetooth.defaultAdapter ? bluetoothColumn.validDevicesList.length : 0} devices found`
+            text: `${Bluetooth.defaultAdapter ? validDevicesList.count : 0} devices found`
             color: theme.colDarkerFg
             font { family: theme.fontFamily; pixelSize: 12; bold: false }
             renderType: Text.NativeRendering
@@ -213,8 +224,7 @@ Item {
             id: scrollView
 
             implicitWidth: 300
-            //implicitHeight: Math.min(scrollAnimatedList.contentHeight, 200) + 5
-            implicitHeight: 400
+            implicitHeight: Math.min(scrollAnimatedList.contentHeight, 200) + 5
             Layout.leftMargin: 5
 
             ScrollBar.vertical.policy: ScrollBar.AsNeeded
@@ -223,7 +233,8 @@ Item {
 
             AnimatedListView {
                 id: scrollAnimatedList
-
+                
+                enableYAnimation: false
                 orientation: ListView.Vertical
                 spacing: 8
 
@@ -235,7 +246,7 @@ Item {
                     NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
                 }
 
-                model: bluetoothColumn.validDevicesList
+                model: validDevicesList
 
                 delegate: Row {
 
@@ -245,7 +256,9 @@ Item {
                     readonly property bool isConnected: modelData?.device?.connected ?? false
                     readonly property bool isPaired: modelData?.device?.paired ?? false 
 
-                    opacity: (modelData.justCreated || modelData.isRemoving) ? 0 : 1
+                    height: 20
+
+                    opacity: modelData.isRemoving ? 0 : 1
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 200
@@ -340,8 +353,11 @@ Item {
                         pixelSize: 18
                         widthOffset: 10
                         heightOffset: 2
-                        buttonRect.x: 1
-                        buttonRect.y: -1
+
+                        textInCenter: false
+                        textComponent.y: -2
+                        textComponent.x: 4
+                        buttonRect.y: -4.5
 
                         onClickedAction: () => {
                             if (Bluetooth.defaultAdapter) {
@@ -352,14 +368,6 @@ Item {
 
                     Behavior on y {
                         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-                    }
-
-                    Component.onCompleted: {
-                        // Bind dynamically after component construction finishes
-                        if (modelData.justCreated) {
-                            opacity = Qt.binding(() => modelData.isRemoving ? 0 : 1)
-                            modelData.justCreated = false
-                        }
                     }
                 }   
             }

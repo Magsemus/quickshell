@@ -86,7 +86,7 @@ Item
         id: iconText
 
         text: root.activeIcon
-        anchors.centerIn: textInCenter ? parent : null
+        anchors.centerIn: textInCenter ? parent : undefined
         
         color: textColor
         opacity: 1.0
