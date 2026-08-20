@@ -156,6 +156,7 @@ Rectangle
             popupRect.rectWidth = item.width + 20 
         }
 
+
         onItemChanged: {
             if (item != null) popupRect.rectHeight = item.height
             else popupRect.rectHeight = 0
