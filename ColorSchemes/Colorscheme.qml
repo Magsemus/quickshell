@@ -4,7 +4,9 @@ QtObject {
     id: root
     property color colBg: "#1a1b26"
     property color colFg: "#a9b1d6"
-    property color colWhite: Qt.rgba(0.6627, 0.6941, 0.8392, 0.5)
+    property color colDarkFg: "#8d95b7"
+    property color colDarkerFg: "#717897"
+    property color colWhite: Qt.rgba(0.6627, 0.6941, 0.8392, 1)
     property color colMuted: "#444b6a"
     property color colCyan: "#0db9d7"
     property color colBlue: "#7aa2f7"
@@ -15,6 +17,8 @@ QtObject {
     property color colHoverBlue: Qt.rgba(0.107, 0.107, 0.766, 0.4)
     property color colClickBlue: Qt.rgba(0.039, 0.039, 0.204, 0.4)
     property color colBlack: Qt.rgba(0, 0, 0, 0.5)
+    property color colToggleSwitchOn: "#b3c5e5"
+    property color colToggleSwitchInnerCircle: "#3b5275"
     property string fontFamily: "JetBrainsMono Nerd Font"
     property int fontSize: 11
 }

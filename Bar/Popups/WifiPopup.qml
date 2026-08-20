@@ -11,8 +11,8 @@ import "../Components/Base"
 Item {
     id: root
 
-    width: loader.width 
-    height: loader.height
+    width: (loader.width <= 0) ? parent.backgroundRect.width : loader.width
+    height: (loader.height <= 0) ? parent.backgroundRect.height : loader.height
 
     component StyledText : Text {
         id: wifiDiagnosticsItem
@@ -410,7 +410,6 @@ Item {
                         onClickedAction: () => {
                             Quickshell.execDetached(["nmcli", "device", "disconnect", wifiDiagnosticsItem.name])
                             loader.sourceComponent = wifiConnectionNames
-                            loader.sourceComponent.item.height = root.height
                         }
                     }
 
@@ -760,7 +759,7 @@ Item {
         {
             id: wifiConnectionNamesItem
             width: 350
-            height: wifiConnectionNamesColumn.height + 10
+            height: (connected) ? root.height : wifiConnectionNamesColumn.height + 10
 
             Column {
                 id: wifiConnectionNamesColumn
@@ -834,7 +833,6 @@ Item {
                             
                             // checks whether a network in the listOfNames can't be seen and removes it from listOfNames
                             if (!beginning) {
-                                console.log(arrayOfNames.length + " "  + scrollView.listOfNames.length);
                                 for (let i = 0 ; i < scrollView.listOfNames.length ; i++) {
                                     let name = scrollView.listOfNames[i]
                                     if (!arrayOfNames.includes(name)) {
@@ -877,6 +875,7 @@ Item {
                                         if (stdoutCollector.text.includes("successfully activated")) {
                                             loader.sourceComponent = wifiDiagnostics
                                             root.height = loader.height
+                                            connected = true
                                         }
                                         else {
                                             networkName = activeIcon
@@ -1076,7 +1075,6 @@ Item {
                 if ((line.includes("StateChanged") || line.includes("PropertiesChanged") && (line.includes("20") || line.includes("70")))) {
                     // Update state cleanly without overflowing DBus
                     if (connected || line.includes("70")) {
-                        connected = false
                         checkConnectionProcess.running = true
                     }
                 }
@@ -1099,8 +1097,6 @@ Item {
             let lines = shellCommandCollector.text.trim().split("\n");
             let interfaceName = lines[1].replace("Interface ", "").trim() + ":disconnected";
             let disconnected = false
-
-            console.log(root.height)
 
             for (let i = 1 ; i < lines.length ; i++)
             {

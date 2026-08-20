@@ -1,15 +1,18 @@
 import Quickshell 
 import QtQuick
 import Quickshell.Io
+import "../../../ColorSchemes"
 
 Rectangle {
     id: backgroundRect
 
+    Colorscheme { id: theme }
+
     property bool toggle: false
-    property var colorOn: "green"
-    property var colorOff: "red"
+    property var colorOn: theme.colToggleSwitchOn
+    property var colorOff: theme.colBlack
     property int innerCircleOffset: 2
-    property var innerCircleColor: "#FFFFFF"
+    property var innerCircleColor: theme.colToggleSwitchInnerCircle
     property int innerCircleOffsetSize: 2
     property var clickAction: () => {
         toggle = !toggle
@@ -37,6 +40,10 @@ Rectangle {
 
         Behavior on x {
             NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        }
+
+        Behavior on color {
+            ColorAnimation { duration: 150 }
         }
     }
     

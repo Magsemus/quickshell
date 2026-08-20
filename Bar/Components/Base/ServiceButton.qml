@@ -11,22 +11,33 @@ Item
     id: root
 
     property string activeIcon: ""
+    property string animationType: "pop"
+
     property var onClickedAction: function () { console.log("No action defined") }
     property var onMouseHoverExit: function () {}
+
     property bool clickAble: true
     property bool hoverAble: true
-    property string animationType: "pop"
+    property bool centerVertically: true
+
     property var textColor: theme.colFg
     property var backgroundColor: "transparent"
+    property var hoverColor: theme.colHoverBlue
+    property var clickedColor: theme.colClickBlue
+    
     property bool isCircle: false
     property int buttonRadius: iconText.width + widthOffset
     property int cornerRadius: 12
+    
     property int widthOffset: 0
     property int heightOffset: 0
     property Rectangle buttonRect: buttonRect 
+    
     property int pixelSize: 14
     property bool textInCenter: true
     property Text textComponent: iconText
+
+    property bool hovering: mouseArea.containsMouse
 
     Colorscheme { id: theme }
 
@@ -41,9 +52,9 @@ Item
         height: isCircle ? buttonRadius : parent.height
         radius: isCircle ? 100 * width : cornerRadius
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: centerVertically ? parent.verticalCenter : undefined
 
-        color: clickAble ? (mouseArea.containsPress ? theme.colClickBlue : (mouseArea.containsMouse ? theme.colHoverBlue : backgroundColor)) : backgroundColor
+        color: clickAble ? (mouseArea.containsPress ? clickedColor : (mouseArea.containsMouse ? hoverColor : backgroundColor)) : backgroundColor
 
         Behavior on color {
             ColorAnimation { duration: 150 }
@@ -73,13 +84,16 @@ Item
     Text
     {
         id: iconText
-        anchors.centerIn: textInCenter ? parent : null
+
         text: root.activeIcon
+        anchors.centerIn: textInCenter ? parent : null
+        
         color: textColor
+        opacity: 1.0
+
         font { family: theme.fontFamily; pixelSize: root.pixelSize; bold: true }
         renderType: Text.NativeRendering
         transformOrigin: Item.Center
-        opacity: 1.0
 
         Behavior on color {
             ColorAnimation {
@@ -92,13 +106,17 @@ Item
     Text
     {
         id: incomingText
-        anchors.centerIn: parent
+        
         text: root.activeIcon
+        anchors.centerIn: parent
+
         color: textColor
+        opacity: 0.0
+        
         font { family: theme.fontFamily; pixelSize: 14; bold: true }
         renderType: Text.NativeRendering
+        
         transformOrigin: Item.Center
-        opacity: 0.0
     }
 
 

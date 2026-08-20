@@ -140,6 +140,8 @@ Rectangle
         id: _contentLoader
 
         property Rectangle backgroundRect: popupRect
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
 
         onHeightChanged: {
             if (popupRect.height != 0) {
@@ -153,8 +155,6 @@ Rectangle
             popupRect.width = item.width + 20
             popupRect.rectWidth = item.width + 20 
         }
-
-        anchors.centerIn: parent
 
         onItemChanged: {
             if (item != null) popupRect.rectHeight = item.height
